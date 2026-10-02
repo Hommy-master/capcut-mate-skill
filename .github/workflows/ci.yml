@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build skill zip
+        run: |
+          set -euo pipefail
+          name="jianchuang-jianying-assistant"
+          stage="$(mktemp -d)"
+          mkdir -p "$stage/$name" dist
+          cp -R SKILL.md README.md _icon.png references scripts "$stage/$name/"
+          (
+            cd "$stage"
+            zip -r -X "$GITHUB_WORKSPACE/dist/${name}.zip" "$name" -x "*.DS_Store"
+          )
+          unzip -Z1 "dist/${name}.zip" | grep -qx "${name}/SKILL.md"
+
+      - name: Publish skill zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          asset="dist/jianchuang-jianying-assistant.zip"
+          notes="可直接使用的技能包。ZIP 内第一层目录为 jianchuang-jianying-assistant/。"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$asset" --clobber
+          else
+            gh release create "$tag" "$asset" \
+              --target "$GITHUB_SHA" \
+              --title "$tag" \
+              --notes "$notes"
+          fi
