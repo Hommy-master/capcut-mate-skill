@@ -1,15 +1,19 @@
 # 剪映小助手
 
-开源的剪映草稿自动化技能。安装后，在 Codex 或 Claude 中用自然语言创建、编辑剪映草稿，异步导出成片，或把草稿安装到本机剪映草稿箱。
+开源的剪映草稿自动化技能。安装后，在 WorkBuddy、Codex 或 Claude 中用自然语言创建、编辑剪映草稿，异步导出成片，或把草稿安装到本机剪映草稿箱。
 
-技能名：`jianchuang-jianying-assistant`。默认请求托管接口 `https://capcut-mate.jcaigc.cn`。创建与编辑免费；托管版导出按量计费。脚本仅依赖 Node.js，无需安装其他包。
+技能名：`jianchuang-jianying-assistant`。默认请求托管接口 `https://capcut-mate.jcaigc.cn`。接口文档：<https://docs.jcaigc.cn>。创建与编辑免费；托管版导出按量计费。脚本仅依赖 Node.js，无需安装其他包。
 
 ## 环境
 
 - [Node.js](https://nodejs.org/) 18 或更高版本
 - Codex CLI，或 Claude Code / Claude
 
-把本仓库放到对应技能目录即可。目录名请使用 `jianchuang-jianying-assistant`，与 `SKILL.md` 中的 `name` 一致。
+自行安装时，把本仓库放到对应技能目录。目录名请使用 `jianchuang-jianying-assistant`，与 `SKILL.md` 中的 `name` 一致。
+
+## WorkBuddy
+
+在技能商店搜索「开源剪映小助手」，可以直接使用。
 
 ## Codex
 
