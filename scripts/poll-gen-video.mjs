@@ -105,7 +105,13 @@ async function main() {
 
   if (argv.submit) {
     const payload = { draft_url: draftUrl };
-    if (argv["api-key"]) payload.apiKey = argv["api-key"];
+    const apiKey = process.env.CAPCUT_MATE_API_KEY || argv["api-key"];
+    if (argv["api-key"]) {
+      process.stderr.write(
+        "警告：--api-key 会暴露在进程列表与命令历史中，请改用环境变量 CAPCUT_MATE_API_KEY。\n",
+      );
+    }
+    if (apiKey) payload.apiKey = apiKey;
     process.stderr.write("正在提交导出任务（gen_video，收费）…\n");
     const submitted = await callApi("gen_video", payload);
     process.stderr.write(`${JSON.stringify(submitted)}\n`);
