@@ -5,9 +5,16 @@
 
 统一基地址：`https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`
 
-完整地址 = 基地址 + `/{接口名}`。除 `get_draft` 使用 `GET` 外，其余接口全部使用 `POST JSON`。
+完整地址 = 基地址 + `/{接口名}`。除 `get_draft` 使用 `GET`、`upload_file` 使用 `multipart/form-data` 外，
+其余接口全部使用 `POST JSON`。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
+
+## 素材上传
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 上传本地文件，换取可用 URL（**收费** 0.0005 元/MB，需 apiKey） | `upload_file` | POST multipart | [upload-file.md](upload-file.md) |
 
 ## 草稿生命周期
 
@@ -36,7 +43,7 @@
 | 添加关键帧 | `add_keyframes` | POST | [add-keyframes.md](add-keyframes.md) |
 | 添加蒙版 | `add_masks` | POST | [add-masks.md](add-masks.md) |
 | 添加蒙版关键帧 | `add_mask_keyframes` | POST | [add-mask-keyframes.md](add-mask-keyframes.md) |
-| 添加美颜 | `add_beauty` | POST | [add-beauty.md](add-beauty.md) |
+| 添加美颜/美型/美妆/美体 | `add_beauty` | POST | [add-beauty.md](add-beauty.md) |
 | 添加贴纸 | `add_sticker` | POST | [add-sticker.md](add-sticker.md) |
 | 添加文本样式 | `add_text_style` | POST | [add-text-style.md](add-text-style.md) |
 

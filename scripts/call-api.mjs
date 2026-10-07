@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
+import * as fs from "node:fs";
 import { readFile } from "node:fs/promises";
+import { basename } from "node:path";
 import { pathToFileURL } from "node:url";
 
 /**
@@ -22,8 +24,10 @@ export const BASE_URL = (
   process.env.CAPCUT_MATE_BASE_URL || DEFAULT_BASE_URL
 ).replace(/\/+$/, "");
 
-/** 官方文档收录的全部 36 个接口。 */
+/** 官方文档收录的全部接口。 */
 export const ENDPOINTS = new Set([
+  // 素材上传
+  "upload_file",
   // 草稿生命周期
   "create_draft",
   "get_draft",
@@ -72,6 +76,9 @@ export const ENDPOINTS = new Set([
 /** 唯一使用 GET 的接口。 */
 export const GET_ENDPOINTS = new Set(["get_draft"]);
 
+/** 使用 multipart/form-data 的接口（文件走 --file，其余字段作为附加表单字段）。 */
+export const MULTIPART_ENDPOINTS = new Set(["upload_file"]);
+
 /** 原生 function calling 不建议主动调用的辅助接口（给扣子/n8n 拼字符串用）。 */
 export const AUXILIARY_ENDPOINTS = new Set([
   "timelines",
@@ -89,7 +96,38 @@ export const AUXILIARY_ENDPOINTS = new Set([
 ]);
 
 /** 收费接口。 */
-export const PAID_ENDPOINTS = new Set(["gen_video"]);
+export const PAID_ENDPOINTS = new Set(["gen_video", "upload_file"]);
+
+/** 收费接口的调用前提示。 */
+const PAID_HINTS = {
+  gen_video: "提示：gen_video 为收费接口（0.3 元/分钟），线上导出需要 apiKey。\n",
+  upload_file:
+    "提示：upload_file 为收费接口（0.0005 元/MB），托管版上传需要 apiKey。\n",
+};
+
+/** 上传文件的 MIME 类型（服务端按扩展名校验，这里只为请求头更准确）。 */
+const MIME_TYPES = {
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  m4v: "video/x-m4v",
+  avi: "video/x-msvideo",
+  mkv: "video/x-matroska",
+  flv: "video/x-flv",
+  webm: "video/webm",
+  wmv: "video/x-ms-wmv",
+  mp3: "audio/mpeg",
+  wav: "audio/wav",
+  m4a: "audio/mp4",
+  aac: "audio/aac",
+  flac: "audio/flac",
+  ogg: "audio/ogg",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  webp: "image/webp",
+  bmp: "image/bmp",
+};
 
 function requirePayload(payload) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
@@ -116,6 +154,9 @@ export function createRequestConfig(endpoint, payload = {}) {
   if (!ENDPOINTS.has(endpoint)) {
     throw new Error(`不允许调用的接口：${endpoint}`);
   }
+  if (MULTIPART_ENDPOINTS.has(endpoint)) {
+    throw new Error(`${endpoint} 需要上传本地文件，请用 --file 指定文件路径`);
+  }
   const data = requirePayload(payload);
   const headers = {
     accept: "application/json",
@@ -141,6 +182,58 @@ export function createRequestConfig(endpoint, payload = {}) {
   };
 }
 
+/** 按扩展名推断 MIME 类型，未知扩展名回落到二进制流。 */
+export function mimeTypeFor(filePath) {
+  const extension = filePath.split(".").pop()?.toLowerCase() ?? "";
+  return MIME_TYPES[extension] ?? "application/octet-stream";
+}
+
+/** 读取本地文件为 Blob；Node 19.8+ 走 openAsBlob，避免大文件占满内存。 */
+async function readFileAsBlob(filePath) {
+  const type = mimeTypeFor(filePath);
+  try {
+    if (typeof fs.openAsBlob === "function") {
+      return await fs.openAsBlob(filePath, { type });
+    }
+    return new Blob([await readFile(filePath)], { type });
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error(`找不到要上传的文件：${filePath}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * 构造 multipart/form-data 请求（当前仅 upload_file）。
+ * 文件走 `filePath`，其余字段作为附加表单字段提交（如 apiKey）。
+ */
+export async function createMultipartRequestConfig(
+  endpoint,
+  payload = {},
+  filePath,
+) {
+  if (!MULTIPART_ENDPOINTS.has(endpoint)) {
+    throw new Error(`该接口不支持文件上传：${endpoint}`);
+  }
+  const data = requirePayload(payload);
+  requireNonEmptyString(filePath, "--file");
+
+  const form = new FormData();
+  for (const [key, value] of Object.entries(data)) {
+    if (key === "file") {
+      throw new Error("file 字段由 --file 指定，不要在 --data 中重复传入");
+    }
+    form.append(key, typeof value === "string" ? value : JSON.stringify(value));
+  }
+  form.append("file", await readFileAsBlob(filePath), basename(filePath));
+
+  return {
+    url: `${BASE_URL}/${endpoint}`,
+    init: { method: "POST", headers: { accept: "application/json" }, body: form },
+  };
+}
+
 /** 从响应体中提取人类可读的错误信息。 */
 export function extractErrorDetail(result, status) {
   if (!result || typeof result !== "object") return `HTTP ${status}`;
@@ -163,8 +256,10 @@ export function assertBusinessOk(result) {
 }
 
 export async function callApi(endpoint, payload, options = {}) {
-  const { fetchImpl = fetch, timeoutMs = 30_000 } = options;
-  const request = createRequestConfig(endpoint, payload);
+  const { fetchImpl = fetch, timeoutMs = 30_000, filePath } = options;
+  const request = filePath
+    ? await createMultipartRequestConfig(endpoint, payload, filePath)
+    : createRequestConfig(endpoint, payload);
   const response = await fetchImpl(request.url, {
     ...request.init,
     signal: AbortSignal.timeout(timeoutMs),
@@ -189,10 +284,12 @@ function usage() {
     "用法：",
     "  node scripts/call-api.mjs --endpoint <接口名> --data '<JSON>'",
     "  node scripts/call-api.mjs --endpoint <接口名> --data-file <JSON文件>",
+    "  node scripts/call-api.mjs --endpoint upload_file --file <本地文件> --data '<附加字段JSON>'",
     "",
     "示例：",
     '  node scripts/call-api.mjs --endpoint create_draft --data \'{"width":1080,"height":1920}\'',
     '  node scripts/call-api.mjs --endpoint get_draft --data \'{"draft_id":"2025092811473036584258"}\'',
+    '  node scripts/call-api.mjs --endpoint upload_file --file ./demo.mp4 --data \'{"apiKey":"<uuid>"}\'',
     "",
     `基地址：${BASE_URL}`,
     BASE_URL === DEFAULT_BASE_URL
@@ -206,7 +303,7 @@ function usage() {
 
 function parseArgs(args) {
   const options = {};
-  const valued = ["--endpoint", "--data", "--data-file", "--timeout"];
+  const valued = ["--endpoint", "--data", "--data-file", "--file", "--timeout"];
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
     if (argument === "--help" || argument === "-h") {
@@ -252,13 +349,20 @@ async function main() {
   } catch {
     throw new Error("请求数据不是有效JSON");
   }
-  if (PAID_ENDPOINTS.has(options.endpoint) && typeof payload.apiKey !== "string") {
-    process.stderr.write(
-      "提示：gen_video 为收费接口（0.3 元/分钟），线上导出需要 apiKey。\n",
-    );
+  if (options.file && !MULTIPART_ENDPOINTS.has(options.endpoint)) {
+    throw new Error(`--file 只适用于：${[...MULTIPART_ENDPOINTS].join("、")}`);
   }
-  const timeoutMs = options.timeout ? Number(options.timeout) : 30_000;
-  const result = await callApi(options.endpoint, payload, { timeoutMs });
+  if (PAID_ENDPOINTS.has(options.endpoint)) {
+    process.stderr.write(PAID_HINTS[options.endpoint]);
+  }
+  const defaultTimeoutMs = MULTIPART_ENDPOINTS.has(options.endpoint)
+    ? 600_000
+    : 30_000;
+  const timeoutMs = options.timeout ? Number(options.timeout) : defaultTimeoutMs;
+  const result = await callApi(options.endpoint, payload, {
+    timeoutMs,
+    filePath: options.file,
+  });
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 

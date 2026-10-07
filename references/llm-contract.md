@@ -85,6 +85,7 @@
 
 | 接口 | 必填 | 备注 |
 |------|------|------|
+| upload_file | `file`（multipart），托管版带 `apiKey` | **收费** 0.0005 元/MB；返回 url 可直接给 `add_*` 用 |
 | add_effects | `draft_url`, `effect_infos` | `effect_infos` 为 JSON 字符串 |
 | add_filters | `draft_url`, `filter_infos` | `filter_infos` 为 JSON 字符串 |
 | add_keyframes | `draft_url`, `keyframes` | `keyframes` 为 JSON 字符串 |

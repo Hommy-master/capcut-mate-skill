@@ -1,9 +1,9 @@
 ---
 name: jianchuang-jianying-assistant
-description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜或关键帧，需要异步导出成片，或者需要下载并安装可继续编辑的剪映草稿时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、gen_video、自动生成剪映视频、批量做视频、开源免费。
-description_en: An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty and keyframes, export the final video asynchronously, and install editable drafts locally. Repository: https://github.com/Hommy-master/capcut-mate
+description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，需要异步导出成片，或者需要下载并安装可继续编辑的剪映草稿时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
+description_en: An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, export the final video asynchronously, and install editable drafts locally. Repository: https://github.com/Hommy-master/capcut-mate
 slug: jianchuang-jianying-assistant
-version: 2.1.0
+version: 2.2.0
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，异步导出成片，并下载安装可继续修改的草稿。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -35,7 +35,9 @@ disable: false
 - **免费边界（重要，请如实告知用户）**
   - 技能本体、草稿创建与编辑类接口：**免费，且无需任何 API Key**。
   - **自部署**：按仓库说明 `docker-compose up -d` 或 `uv run main.py` 起服务，把基地址换成你自己的实例，导出成片同样免费（导出依赖本地渲染，官方说明**仅 Windows 系统可用**）。
-  - **托管版**（`capcut-mate.jcaigc.cn`）的成片导出 `gen_video` 为付费接口（0.3 元/分钟，SVIP 0.18 元/分钟），这是官方云端渲染的算力成本，需自备 `apiKey`。若不希望付费，请改用自部署实例。
+  - **托管版**（`capcut-mate.jcaigc.cn`）有两个付费接口，都需自备 `apiKey`；若不希望付费，请改用自部署实例。
+    - 成片导出 `gen_video`：0.3 元/分钟（SVIP 0.18 元/分钟），是官方云端渲染的算力成本。
+    - 素材上传 `upload_file`：0.0005 元/MB，是对象存储中转的成本。
 - 自部署实例与本技能完全兼容：只需把「硬规则」中的基地址替换为你的部署地址，接口契约一致。
 
 ## 硬规则（必须遵守）
@@ -46,28 +48,34 @@ disable: false
 3. **先 `create_draft`**，后续每个写接口都必须带上返回的 `draft_url`，并**原样透传**，禁止自行拼接 `draft_id`。
 4. **列表字段是 JSON 字符串**（序列化后的字符串），不是对象数组：
    `video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. **仅 `gen_video` 收费**（0.3 元/分钟，SVIP 0.18 元/分钟），需要 UUID 格式的 `apiKey`，用户自备。
-   其余接口免费。没有 `apiKey` 时不要盲目重试导出，先向用户说明。
-   该收费仅针对**托管版**的云端渲染；改用自部署实例可免费导出（见上文「开源与许可」）。
+5. **托管版有两个收费接口**，都需要 UUID 格式的 `apiKey`（用户自备）：
+   `gen_video`（0.3 元/分钟，SVIP 0.18 元/分钟）与 `upload_file`（0.0005 元/MB，按文件体积计费）。
+   其余接口免费。没有 `apiKey` 时不要盲目重试，先向用户说明。
+   这两项收费仅针对**托管版**；改用自部署实例可免费（见上文「开源与许可」）。
 6. **导出是异步的**：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`
    （建议每 3–5 秒一次），直到 `status` 为 `completed` 或 `failed`。`failed` 时读取 `error_message` 并停止，不要死循环。
-7. 唯一使用 `GET` 的接口是 `get_draft`（`draft_id` 走 query 参数）；其余 35 个接口全部是 `POST JSON`。
+7. 请求方式：`get_draft` 是唯一的 `GET`（`draft_id` 走 query 参数）；`upload_file` 是唯一的
+   `multipart/form-data`；其余接口全部是 `POST JSON`。
 
 ## 怎样使用
 
 直接用中文描述目标，无需记忆接口名。例如：
 
 - “用这三张图片创建一个竖屏剪映草稿，每张显示 3 秒，加上字幕和背景音乐。”
-- “给这条视频加一个复古滤镜和美颜，再添个点赞贴纸。”
+- “给这条视频加一个复古滤镜，再做美颜美体和美妆，再添个点赞贴纸。”
+- “把我本地这个 demo.mp4 传上去用到草稿里。”（走 `upload_file`，会提示上传收费）
 - “把这个草稿导出成 MP4。”（会提示导出收费）
 - “把完成的草稿下载并安装到我的剪映草稿目录。”
 
-素材需要是服务端能够访问的**公网 URL**；本地素材应先上传到你信任且允许公开访问的位置。
+素材需要是服务端能够访问的**公网 URL**。本地素材有两条路：用 `upload_file` 上传到对象存储
+（收费 0.0005 元/MB，需 `apiKey`，返回的 URL 可直接给 `add_*` 使用），
+或你自行把它放到信任且允许公开访问的位置。
 
 ## 主流程
 
 ```
-create_draft
+（可选）upload_file —— 本地素材先换成公网 URL（收费）
+   → create_draft
    → add_videos / add_images / add_audios / add_captions（可多次）
    → 可选增强：add_effects / add_filters / add_keyframes / add_masks / add_mask_keyframes / add_beauty / add_sticker / add_text_style
    → save_draft
@@ -96,6 +104,7 @@ create_draft
 
 | 接口 | 说明 | 参考 |
 |---|---|---|
+| `upload_file` | 上传本地文件到对象存储，返回可直接给 `add_*` 用的带签名 URL（**收费** 0.0005 元/MB，需 `apiKey`；唯一 `multipart/form-data` 接口） | [upload-file.md](references/upload-file.md) |
 | `easy_create_material` | 一张图/一段视频 + 一段文字 + 一条音频，一步出草稿（只返回 `draft_url`，无法严格验收） | [easy-create-material.md](references/easy-create-material.md) |
 | `get_draft` | 获取草稿文件列表（唯一 GET 接口） | [get-draft.md](references/get-draft.md) |
 
@@ -108,7 +117,7 @@ create_draft
 | `add_keyframes` | `draft_url`, `keyframes` | JSON 字符串；`offset` 为片段内微秒 | [add-keyframes.md](references/add-keyframes.md) |
 | `add_masks` | `draft_url`, `segment_ids`, `name` | 先有视频/图片片段 | [add-masks.md](references/add-masks.md) |
 | `add_mask_keyframes` | `draft_url`, `keyframes` | 片段必须已用 `add_masks` 加过蒙版 | [add-mask-keyframes.md](references/add-mask-keyframes.md) |
-| `add_beauty` | `draft_url`, `segment_ids` + 至少一个美颜参数 | 具名参数（匀肤/美白/磨皮…）或 `beauty_infos` | [add-beauty.md](references/add-beauty.md) |
+| `add_beauty` | `draft_url`, `segment_ids` + `skin`/`shape`/`makeup`/`body` 至少一组 | 字段为英文分组（0 表示不写入），预设取值仍是中文 | [add-beauty.md](references/add-beauty.md) |
 | `add_sticker` | `draft_url`, `sticker_id`, `start`, `end` | `sticker_id` 来自 `search_sticker` | [add-sticker.md](references/add-sticker.md) |
 | `add_text_style` | 见参考 | 富文本样式 | [add-text-style.md](references/add-text-style.md) |
 
@@ -147,6 +156,7 @@ create_draft
 6. `image_infos`、`video_infos`、`audio_infos`、`captions`、`effect_infos`、`filter_infos`、`keyframes`
    是 JSON 字符串。
 7. 用户需要成片时走 `gen_video` + `gen_video_status`；**先告知收费**（0.3 元/分钟）并确认用户已备好 `apiKey`。
+   上传本地素材走 `upload_file`，同样**先告知收费**（0.0005 元/MB）并确认 `apiKey`。
 8. 只有用户要求下载或安装时才运行安装器。安装前确认目标是用户认可、存在且可写的剪映草稿根目录；默认拒绝覆盖同名草稿。
 
 ### 创建新草稿
@@ -164,7 +174,9 @@ create_draft
 - 多素材任务先构造好完整的 JSON 字符串再调用，避免多次试错。
 - 添加贴纸时先用 `search_sticker`，并验证标题确实匹配；搜索结果非空不代表匹配成功。
 - 滤镜的 `filter_title` 必须与剪映滤镜展示名一致，未匹配到时添加会失败。
-- 美颜只支持视频/图片片段，且至少需要一个非默认参数；瘦脸、大眼等未支持的滑杆会被拒绝。
+- 美颜（`add_beauty`）只支持视频/图片片段，`skin`/`shape`/`makeup`/`body` 至少一组生效；
+  字段名是英文，预设取值是中文；窄脸、下巴长短、宽肩是预留字段，只能传 0。
+- 本地文件先 `upload_file` 换成公网 URL，再进入 `add_*`；返回的 URL 是带签名的临时地址（默认 7 天），要在本轮任务里用掉。
 - `easy_create_material` 只返回 `draft_url`；需要严格验收时改用独立的 `add_*` 接口。
 - 三图、字幕和背景音乐案例读取 [references/example-image-caption-bgm.md](references/example-image-caption-bgm.md)。
 
@@ -176,7 +188,13 @@ create_draft
 node scripts/call-api.mjs --endpoint create_draft --data '{"width":1080,"height":1920}'
 ```
 
-复杂参数写入临时 JSON 文件后使用 `--data-file`。导出轮询可用：
+复杂参数写入临时 JSON 文件后使用 `--data-file`。上传本地文件用 `--file`（`--data` 里的字段会作为附加表单字段）：
+
+```bash
+node scripts/call-api.mjs --endpoint upload_file --file ./demo.mp4 --data '{"apiKey":"<uuid>"}'
+```
+
+导出轮询可用：
 
 ```bash
 node scripts/poll-gen-video.mjs --draft-url "<draft_url>"
@@ -202,8 +220,8 @@ node scripts/poll-gen-video.mjs --draft-url "<draft_url>"
 
 - **完全开源免费**：技能与后端 CapCut Mate 均开源，可免费使用与自行部署。
   开源仓库 <https://github.com/Hommy-master/capcut-mate>（Apache-2.0，Gitee 镜像 <https://gitee.com/taohongmin-gitee/capcut-mate>）。
-- 创建与编辑草稿免费、无需 API Key；**托管版**导出成片按 0.3 元/分钟计费（SVIP 0.18 元/分钟）。
-  不想付费可自部署后端，导出免费（自部署导出依赖本地渲染，官方说明仅 Windows 可用）。
+- 创建与编辑草稿免费、无需 API Key；**托管版**导出成片按 0.3 元/分钟计费（SVIP 0.18 元/分钟），
+  上传素材按 0.0005 元/MB 计费。不想付费可自部署后端（自部署导出依赖本地渲染，官方说明仅 Windows 可用）。
 - `apiKey` 只在用户主动提供时使用，不要索取或猜测。
 - 本地安装功能面向 Windows 剪映；安装位置必须是用户确认、存在且可写的剪映草稿根目录。
 - 剪映版本或草稿格式变化后，个别效果可能存在兼容差异。

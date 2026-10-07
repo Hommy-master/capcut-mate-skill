@@ -2,7 +2,7 @@
 
 开源的剪映草稿自动化技能。安装后，在 WorkBuddy、Codex 或 Claude 中用自然语言创建、编辑剪映草稿，异步导出成片，或把草稿安装到本机剪映草稿箱。
 
-技能名：`jianchuang-jianying-assistant`。默认请求托管接口 `https://capcut-mate.jcaigc.cn`。接口文档：<https://docs.jcaigc.cn>。创建与编辑免费；托管版导出按量计费。脚本仅依赖 Node.js，无需安装其他包。
+技能名：`jianchuang-jianying-assistant`。默认请求托管接口 `https://capcut-mate.jcaigc.cn`。接口文档：<https://docs.jcaigc.cn>。创建与编辑免费；托管版导出成片与上传素材按量计费（导出 0.3 元/分钟，上传 0.0005 元/MB）。脚本仅依赖 Node.js，无需安装其他包。
 
 ## 环境
 

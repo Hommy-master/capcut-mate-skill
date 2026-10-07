@@ -8,11 +8,12 @@
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 仅 `gen_video` 收费，需要 `apiKey`（UUID）。其余接口免费。
+5. 仅托管版的 `gen_video`（0.3 元/分钟）与 `upload_file`（0.0005 元/MB）收费，需要 `apiKey`（UUID）。其余接口免费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 
 ## 默认工作流
 
+0. 本地素材：`POST /upload_file`（multipart，收费）换成公网 URL
 1. `POST /create_draft` → 拿到 `draft_url`
 2. 按需要多次调用 `add_videos` / `add_images` / `add_audios` / `add_captions`
 3. 可选：`add_effects` / `add_filters` / `add_keyframes` / `add_masks`
