@@ -116,5 +116,5 @@ curl -X GET "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draf
 
 ## ⚠️ 实施提示（本技能补充）
 
-- 官方响应示例中的 `files` 是**文件名**（如 `2f52a63b-....json`），不一定是可下载的完整 URL。本地安装脚本 `scripts/install-draft.mjs` 同时兼容「完整 URL」与「裸文件名」两种返回。
+- 官方响应示例中的 `files` 是**文件名**（如 `2f52a63b-....json`），不一定是可下载的完整 URL。本地下载脚本 `scripts/download-draft.mjs`（旧入口 `scripts/install-draft.mjs`）同时兼容「完整 URL」与「裸文件名」两种返回；裸文件名需要 `--file-base`。详见 [download-draft.md](download-draft.md)。
 - 本接口是唯一使用 `GET` 的接口，`draft_id` 走 query 参数，而不是 JSON body。

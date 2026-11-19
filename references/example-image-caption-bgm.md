@@ -91,12 +91,14 @@ node scripts/poll-gen-video.mjs --draft-url "<draft_url>"
 
 直到 `status` 为 `completed`（读取 `video_url`）或 `failed`（读取 `error_message` 后停止）。
 
-## 8. 可选：安装到剪映草稿箱
+## 8. 可选：下载到剪映草稿箱
 
 用户要求时，使用最终 `draft_url` 运行：
 
 ```bash
-node scripts/install-draft.mjs --draft-url "<draft_url>"
+node scripts/download-draft.mjs --draft-url "<draft_url>"
 ```
 
-完成后报告安装目录，并提醒用户重新打开或刷新剪映草稿箱。
+下载器会一并下载草稿内引用的远程素材并激活剪映发现。完成后报告 `draftDirectory`
+与 `jianyingDiscovered`；未确认发现时提醒用户重新打开或重启剪映。详见
+[download-draft.md](download-draft.md)。

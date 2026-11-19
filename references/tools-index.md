@@ -89,6 +89,15 @@
 | 调用顺序、硬规则、最小示例 | [llm-guide.md](llm-guide.md) |
 | 核心写接口的最小请求体 | [llm-contract.md](llm-contract.md) |
 
+## 本地脚本（不经 API）
+
+| 需求 | 脚本 | 参考 |
+|---|---|---|
+| 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
+| 导出任务轮询 | `scripts/poll-gen-video.mjs` | [gen-video-status.md](gen-video-status.md) |
+| 下载草稿到本机剪映草稿箱（素材本地化 + 激活发现） | `scripts/download-draft.mjs` | [download-draft.md](download-draft.md) |
+| 旧版安装入口（兼容别名） | `scripts/install-draft.mjs` | [download-draft.md](download-draft.md) |
+
 ## 不要主动调用的接口
 
 以下接口是给扣子（Coze）/ n8n 等平台**拼 JSON 字符串**用的辅助接口。原生 function calling 场景下不要主动调用，
