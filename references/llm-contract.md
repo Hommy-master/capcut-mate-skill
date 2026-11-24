@@ -117,6 +117,24 @@
 | get_effects | `mode`（可选 0/1/2） | 查询合法 `effect_title`，免费 |
 | save_draft | `draft_url` | 通常可省略，写接口会落盘 |
 
+## 图像生成（独立网关）
+
+Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按张计费。
+默认模型 `doubao-seedream-5-0-flash`（0.12 元/张），用户未指定时用它。
+
+```json
+// POST /v1/images/generations
+{
+  "model": "doubao-seedream-5-0-flash",
+  "prompt": "窗台上打盹的橘猫，晨光，浅景深",
+  "size": "1024x1024",
+  "n": 1
+}
+```
+
+响应同步返回 `data[].url`，可直接作为 `add_images` 的 `image_url`。Gemini 两条支持
+`image_urls` 参考图与 `aspect_ratio`，每次只生成 1 张，URL 默认 7 天有效。
+
 ## 语音识别（ASR，独立服务）
 
 Base URL `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，按音频时长

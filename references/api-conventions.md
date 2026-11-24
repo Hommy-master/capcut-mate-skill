@@ -21,6 +21,8 @@
 - 调用 `create_draft` / `add_*` 等接口**不需要** API Key。托管版的 `gen_video` 与 `upload_file` 需要 UUID 格式的 `apiKey`。
 - **语音识别（ASR）是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
   按音频时长 0.00022 元/秒计费（识别成功后扣费），需要 `apiKey`；与剪映小助手共用充值余额。
+- **图像生成是独立网关**：基地址 `https://api.jcaigc.cn/v1`，`POST /v1/images/generations`，
+  鉴权用 `Authorization: Bearer <apiKey>`，按张计费（0.12–1.12 元/张），同步返回图片 URL。
 
 ## 认证与计费
 
@@ -30,6 +32,7 @@
 | `upload_file` 托管版上传素材 | **是**，UUID 格式，用户自备 | 0.005 元/MB，单次最低 0.002 元（上传成功后扣费） |
 | `gen_video` 托管版导出视频 | **是**，UUID 格式，用户自备 | 0.3 元/分钟（VIP 0.24、SVIP 0.18 元/分钟） |
 | ASR（独立服务 `autosubrt.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 0.00022 元/秒（按音频时长，识别成功后扣费） |
+| 图像生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedream-5-0-flash` 0.12 元/张；其它模型 0.2–1.12 元/张（Gemini 按 1K/2K/4K 分档） |
 | 自部署实例 | 默认关闭校验（`ENABLE_APIKEY`） | 无托管费用 |
 
 托管版调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；
