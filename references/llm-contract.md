@@ -153,6 +153,23 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 响应返回 `task_id`；再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读 `video_url`。
 异步任务要及时轮询，30 分钟未取结果会 `expired` 且不退预扣费用。
 
+## 数字人（复用视频网关）
+
+Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按生成时长计费。
+
+```json
+// 视频对口型：videoretalk，0.08 元/秒
+{ "model": "videoretalk", "video_url": "https://...", "audio_url": "https://..." }
+```
+
+```json
+// 图片说话：wan2.2-s2v，480P 0.5 / 720P 0.9 元/秒
+{ "model": "wan2.2-s2v", "image_url": "https://...", "audio_url": "https://...", "resolution": "480P" }
+```
+
+提交到 `POST /v1/video/generations`，用 `GET /v1/video/generations/{task_id}` 轮询。
+图片说话音频 ≤20 秒，视频对口型 ≤120 秒。
+
 ## 音乐生成（独立网关）
 
 Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按次计费。

@@ -395,7 +395,7 @@ async function main() {
 
   if (payload.audio_url || payload.video_url) {
     throw new Error(
-      "audio_url / video_url 属于数字人能力，本脚本不处理；请参考 docs.jcaigc.cn/avatar/",
+      "audio_url / video_url 属于数字人能力；请改用 scripts/generate-digital-human.mjs",
     );
   }
   if (!modelInfo.veo && (payload.last_frame_url || payload.reference_images)) {
