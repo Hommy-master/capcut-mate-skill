@@ -135,6 +135,24 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 响应同步返回 `data[].url`，可直接作为 `add_images` 的 `image_url`。Gemini 两条支持
 `image_urls` 参考图与 `aspect_ratio`，每次只生成 1 张，URL 默认 7 天有效。
 
+## 视频生成（独立网关）
+
+Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按秒计费。
+默认模型 `doubao-seedance-2.0` + `480P`（0.45 元/秒），用户未指定时用它。
+
+```json
+// POST /v1/video/generations
+{
+  "model": "doubao-seedance-2.0",
+  "prompt": "镜头缓慢推进，雨后的城市街道，霓虹倒影",
+  "resolution": "480P",
+  "duration": 5
+}
+```
+
+响应返回 `task_id`；再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读 `video_url`。
+异步任务要及时轮询，30 分钟未取结果会 `expired` 且不退预扣费用。
+
 ## 语音识别（ASR，独立服务）
 
 Base URL `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，按音频时长

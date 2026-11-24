@@ -7,7 +7,7 @@
 
 完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
 `upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
-ASR 与图像生成是独立服务，见下方单独章节。
+ASR、图像生成与视频生成是独立服务，见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -101,6 +101,21 @@ ASR 与图像生成是独立服务，见下方单独章节。
 `doubao-seedream-5-0-pro`、`doubao-seedream-5-0-flash`、`gemini-3.1-flash-image`、
 `gemini-3.1-flash-lite-image`。完整参数、单价与超时说明见 [generate-image.md](generate-image.md)。
 
+## 视频生成（独立网关）
+
+视频生成走同一网关：基地址 `https://api.jcaigc.cn/v1`，鉴权用 `Authorization: Bearer <apiKey>`，
+**按秒计费**，异步提交后轮询。**默认 `doubao-seedance-2.0` + `480P`（0.45 元/秒）**；
+用户未指定时用它，调用前告知计费与时长，并可换其它模型/分辨率。
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 提交文生视频 / 图生视频 | `POST /v1/video/generations` | POST | [generate-video.md](generate-video.md) |
+| 轮询任务结果 | `GET /v1/video/generations/{task_id}` | GET | [generate-video.md](generate-video.md) |
+| 查询当前可用模型 | `GET /v1/models` | GET | [generate-video.md](generate-video.md) |
+
+支持的模型与单价见 [generate-video.md](generate-video.md)。轮询必须用同一把 `apiKey`；
+`failed` 全额退还，30 分钟未取结果会 `expired` 且不退预扣费用。
+
 ## 语音识别（ASR，独立服务）
 
 ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
@@ -126,6 +141,7 @@ ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀
 |---|---|---|
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
 | 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
+| 视频生成调用（独立网关） | `scripts/generate-video.mjs` | [generate-video.md](generate-video.md) |
 | 语音识别调用（独立服务） | `scripts/call-asr.mjs` | [asr.md](asr.md) |
 | 导出任务轮询 | `scripts/poll-gen-video.mjs` | [gen-video-status.md](gen-video-status.md) |
 | 下载草稿到本机剪映草稿箱（素材本地化 + 激活发现） | `scripts/download-draft.mjs` | [download-draft.md](download-draft.md) |
