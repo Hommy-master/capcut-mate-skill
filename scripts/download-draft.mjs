@@ -12,7 +12,7 @@
  *      ##_draftpath_placeholder_<UUID>_## 相对路径；
  *   4. 改写 draft_meta_info.json 的草稿名与目录，指向本地正式草稿目录；
  *   5. macOS/Linux 通过隐藏暂存目录 + 原子改名发布；Windows 直接写正式目录，
- *      并用 robocopy 触发剪映的目录发现；
+ *      并用 robocopy 触发剪映的目录发现；全部文件成功后写入草稿目录提示文件；
  *   6. 轮询草稿根目录的 root_meta_info.json，确认剪映已收录该草稿。
  *
  * 域名白名单与旧版安装器一致：草稿链接只接受 jcaigc.cn 域名族；
@@ -81,6 +81,7 @@ import {
   macPermissionHint,
   probeWriteAccess,
 } from "./lib/file-permission.mjs";
+import { writeDraftReadmeFile } from "./lib/draft-readme.mjs";
 
 /** 官方域名族（含 capcut-mate.jcaigc.cn、cm.jcaigc.cn 等）。 */
 const OFFICIAL_DOMAIN = "jcaigc.cn";
@@ -1122,6 +1123,18 @@ export async function downloadDraft(options = {}) {
     } catch (error) {
       if (!isPermissionError(error)) throw error;
       permissionError = error;
+    }
+  }
+
+  // 附带提示文件（参考 desktop-client/nodeapi/draftReadme.js）：用户直接打开草稿
+  // 文件夹时，一眼知道这是剪映草稿、不是可直接播放的成片。提示文件不是草稿本体，
+  // 写失败只记日志，不影响草稿安装。macOS/Linux 写在暂存目录，随原子改名一起发布。
+  if (!permissionError && tracker.failureCount === 0) {
+    try {
+      const readmePath = await writeDraftReadmeFile(workDir);
+      log.info(`已写入草稿提示文件：${readmePath}`);
+    } catch (error) {
+      log.warn(`写入草稿提示文件失败：${error.message}`);
     }
   }
 

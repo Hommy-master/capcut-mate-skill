@@ -90,9 +90,12 @@ export JIANYING_DRAFT_ROOT="$HOME/Movies/JianyingPro/User Data/Projects/com.lved
      新目录，半成品不会被索引。
    - **Windows**：直接写正式目录，再用 `robocopy` 复制到临时目录并删除，
      触发 `ReadDirectoryChangesW`，让剪映无需重启即可发现新草稿。
-8. 轮询草稿根目录的 `root_meta_info.json`，确认剪映已把草稿登记进
+8. 全部文件成功时，在草稿目录写入提示文件
+   `【剪映草稿】请用剪映打开查看成片.txt`（UTF-8 BOM），说明这是剪映草稿、
+   不是可直接播放的成片；写入失败只记日志，不影响草稿安装。
+9. 轮询草稿根目录的 `root_meta_info.json`，确认剪映已把草稿登记进
    `all_draft_store`。
-9. 下载前用真实写入探针检查目录权限（macOS TCC 下 `fs.access` 可能误报成功）。
+10. 下载前用真实写入探针检查目录权限（macOS TCC 下 `fs.access` 可能误报成功）。
 
 ## 结果字段
 

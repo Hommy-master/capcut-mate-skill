@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，剪辑完成后默认下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现），或需要异步导出成片时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: "An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate"
 slug: jianchuang-jianying-assistant
-version: 2.4.2
+version: 2.4.3
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -196,6 +196,7 @@ disable: false
 - `easy_create_material` 只返回 `draft_url`；需要严格验收时改用独立的 `add_*` 接口。
 - 剪辑完成后默认下载草稿到本机剪映草稿箱，并告知用户可用剪映打开草稿查看成片；只有用户明确拒绝才跳过。
   下载前确认剪映草稿根目录：优先让下载器自动探测；探测失败时再让用户从剪映设置中确认，不要猜测或新建目录。
+  全部文件成功时，草稿目录内会生成 `【剪映草稿】请用剪映打开查看成片.txt` 提示文件。
 - 下载完成后询问用户是否需要自动导出成片（`gen_video`，收费 0.3 元/分钟，需 `apiKey`）；
   用户不知道 `apiKey` 从哪里获取时，提示到 <https://jcaigc.cn> 获取。
 - 下载完成后以结果中的 `installed`、`files.failure`、`jianyingDiscovered` 为准交付；
