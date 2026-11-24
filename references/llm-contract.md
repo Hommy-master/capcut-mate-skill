@@ -58,11 +58,13 @@
 ```json
 {
   "draft_url": "YOUR_DRAFT_URL",
-  "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好，剪映\"}]",
+  "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好剪映\"}]",
   "font_size": 15,
   "text_color": "#ffffff"
 }
 ```
+
+`text` 默认每行少于 15 个汉字且不含标点：先按标点断句并去掉标点，仍超长再硬切（不拆数字和英文单词）。
 
 ### gen_video
 

@@ -54,6 +54,8 @@
 }
 ```
 
+字幕文案默认按 [add-captions.md](add-captions.md) 的规则拆分：每行少于 15 个汉字，不含标点。
+
 ## 5. 添加 BGM
 
 先用 `get_audio_duration` 检查音频时长。音频不少于 9 秒时：

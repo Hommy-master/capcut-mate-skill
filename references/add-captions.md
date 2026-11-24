@@ -12,6 +12,18 @@ POST /openapi/capcut-mate/v1/add_captions
 
 必须传入 create_draft 返回的 draft_url。captions 必须是 JSON 字符串（不是对象数组）。start/end 单位为微秒。
 
+## 字幕文案拆分规则（默认）
+
+用户没有特别要求时，按以下规则拆分文案：
+
+1. **每行少于 15 个汉字**（即最多 14 个汉字）。
+2. **字幕文本中不要出现标点符号**。先按原句的标点断句，断句后删除标点。
+3. 断句后单行仍有 15 个及以上汉字时，继续硬切，直到每行都少于 15 个汉字；
+   硬切时**不要把数字或英文单词拆开**。
+4. 用户明确要求保留标点、指定每行字数或采用其他排版时，按用户要求实现。
+
+示例：`今天天气真好，我们一起去公园散步吧！` → `今天天气真好`、`我们一起去公园散步吧`。
+
 ## 请求参数
 
 ### 接口级参数说明
@@ -1292,7 +1304,7 @@ VHS
     {
       "start": 0,                              // 【必填】开始时间（微秒）
       "end": 3000000,                          // 【必填】结束时间（微秒），须 > start
-      "text": "你好，剪映字幕",                 // 【必填】字幕文本
+      "text": "你好剪映字幕",                 // 【必填】字幕文本
       "keyword": "剪映|字幕",                   // 【可选】关键词，多个用 | 分隔
       "keyword_color": "#ff7100",              // 【可选】关键词颜色
       "keyword_border_color": "#000000",       // 【可选】关键词描边颜色
@@ -1401,7 +1413,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
   -H "Content-Type: application/json" \
   -d '{
     "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
-    "captions": "[{\"start\":0,\"end\":3000000,\"text\":\"你好，剪映字幕\",\"keyword\":\"剪映|字幕\",\"keyword_color\":\"#ff7100\",\"keyword_border_color\":\"#000000\",\"keyword_font\":\"思源中宋\",\"keyword_font_size\":22,\"keyword_has_shadow\":true,\"keyword_shadow_info\":{\"shadow_alpha\":0.85,\"shadow_color\":\"#000000\",\"shadow_diffuse\":18.0,\"shadow_distance\":6.0,\"shadow_angle\":-45.0},\"font_size\":18,\"in_animation\":\"向上滑动\",\"out_animation\":\"向下滑动\",\"loop_animation\":\"弹幕滚动\",\"in_animation_duration\":500000,\"out_animation_duration\":500000,\"loop_animation_duration\":1000000},{\"start\":3000000,\"end\":6000000,\"text\":\"欢迎使用字幕功能\",\"keyword\":\"字幕\",\"keyword_color\":\"#457616\",\"keyword_border_color\":\"#111111\",\"keyword_font_size\":20,\"keyword_has_shadow\":true,\"keyword_shadow_info\":{\"shadow_alpha\":0.9,\"shadow_color\":\"#000000\",\"shadow_diffuse\":15.0,\"shadow_distance\":5.0,\"shadow_angle\":-45.0},\"font_size\":16,\"in_animation\":\"右上弹入\",\"out_animation\":\"右上弹出\",\"loop_animation\":\"VHS\",\"in_animation_duration\":400000,\"out_animation_duration\":400000,\"loop_animation_duration\":800000}]",
+    "captions": "[{\"start\":0,\"end\":3000000,\"text\":\"你好剪映字幕\",\"keyword\":\"剪映|字幕\",\"keyword_color\":\"#ff7100\",\"keyword_border_color\":\"#000000\",\"keyword_font\":\"思源中宋\",\"keyword_font_size\":22,\"keyword_has_shadow\":true,\"keyword_shadow_info\":{\"shadow_alpha\":0.85,\"shadow_color\":\"#000000\",\"shadow_diffuse\":18.0,\"shadow_distance\":6.0,\"shadow_angle\":-45.0},\"font_size\":18,\"in_animation\":\"向上滑动\",\"out_animation\":\"向下滑动\",\"loop_animation\":\"弹幕滚动\",\"in_animation_duration\":500000,\"out_animation_duration\":500000,\"loop_animation_duration\":1000000},{\"start\":3000000,\"end\":6000000,\"text\":\"欢迎使用字幕功能\",\"keyword\":\"字幕\",\"keyword_color\":\"#457616\",\"keyword_border_color\":\"#111111\",\"keyword_font_size\":20,\"keyword_has_shadow\":true,\"keyword_shadow_info\":{\"shadow_alpha\":0.9,\"shadow_color\":\"#000000\",\"shadow_diffuse\":15.0,\"shadow_distance\":5.0,\"shadow_angle\":-45.0},\"font_size\":16,\"in_animation\":\"右上弹入\",\"out_animation\":\"右上弹出\",\"loop_animation\":\"VHS\",\"in_animation_duration\":400000,\"out_animation_duration\":400000,\"loop_animation_duration\":800000}]",
     "text_color": "#ffffff",
     "border_color": "#333333",
     "alignment": 1,
@@ -1459,7 +1471,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
 | 字段 | 示例值 | 含义 |
 |------|--------|------|
 | start / end | `0` / `3000000` | 【必填】起止时间（微秒） |
-| text | `你好，剪映字幕` | 【必填】字幕文本 |
+| text | `你好剪映字幕` | 【必填】字幕文本 |
 | keyword | `剪映\|字幕` | 【可选】高亮关键词 |
 | keyword_color | `#ff7100` | 【可选】关键词颜色 |
 | keyword_border_color | `#000000` | 【可选】关键词描边 |
@@ -1480,7 +1492,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
   -H "Content-Type: application/json" \
   -d '{
     "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
-    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好，剪映\"}]"
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好剪映\"}]"
   }'
 ```
 
@@ -1491,7 +1503,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
   -H "Content-Type: application/json" \
   -d '{
     "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
-    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好，剪映\",\"keyword\":\"剪映\",\"keyword_color\":\"#ff0000\",\"keyword_font_size\":22,\"keyword_has_shadow\":true,\"keyword_shadow_info\":{\"shadow_alpha\":0.8,\"shadow_color\":\"#000000\",\"shadow_diffuse\":20.0,\"shadow_distance\":8.0,\"shadow_angle\":-45.0}}]",
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好剪映\",\"keyword\":\"剪映\",\"keyword_color\":\"#ff0000\",\"keyword_font_size\":22,\"keyword_has_shadow\":true,\"keyword_shadow_info\":{\"shadow_alpha\":0.8,\"shadow_color\":\"#000000\",\"shadow_diffuse\":20.0,\"shadow_distance\":8.0,\"shadow_angle\":-45.0}}]",
     "text_color": "#ffffff",
     "font_size": 16,
     "alignment": 1
@@ -1505,7 +1517,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
   -H "Content-Type: application/json" \
   -d '{
     "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
-    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好，剪映\"}]",
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好剪映\"}]",
     "text_color": "#ffffff",
     "font_size": 20,
     "has_shadow": true
