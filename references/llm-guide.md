@@ -1,6 +1,6 @@
 # 模型调用指南
 
-> 摘自官方《模型调用指南》 https://docs.jcaigc.cn/guide/llm-guide.zh.html ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
+> 摘自官方《模型调用指南》 https://docs.jcaigc.cn/capcut-mate/llm-guide.zh ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
 
 ## 硬规则
 
@@ -8,16 +8,19 @@
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 仅托管版的 `gen_video`（0.3 元/分钟）与 `upload_file`（0.0005 元/MB）收费，需要 `apiKey`（UUID）。其余接口免费。
+5. 仅托管版的 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 8. **只能通过接口生成草稿**：除下载器安装时的素材本地化改写外，不要直接修改剪映草稿文件
    （草稿文件是加密的）。需要调整时重新运行 `create_draft` + `add_*`；图片、视频、音频 URL
    可复用，非必要不要重新上传。
+9. **ASR 是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
+   按音频时长 0.00022 元/秒计费，需要 `apiKey`。`asr` / `asr_srt` 返回**毫秒**，
+   `asr_text_align` 返回**微秒**（可直接给 `add_captions`）。
 
 ## 默认工作流
 
-0. 本地素材：`POST /upload_file`（multipart，收费）换成公网 URL（临时文件，最多下载 10 次；仅下载草稿触发下载，`add_*` 不消耗）
+0. 本地素材：`POST /upload_file`（multipart，收费 0.005 元/MB）换成公网 URL（签名 URL 默认 7 天；仅下载草稿触发下载，`add_*` 只登记 URL）
 1. `POST /create_draft` → 拿到 `draft_url`
 2. 按需要多次调用 `add_videos` / `add_images` / `add_audios` / `add_captions`
 3. 可选：`add_effects` / `add_filters` / `add_keyframes` / `add_masks`
@@ -37,6 +40,19 @@ flowchart LR
   poll -->|pending or processing| poll
   poll -->|completed| videoUrl[video_url]
 ```
+
+## 可选：语音识别（ASR，独立服务）
+
+需要从音频生成字幕时：
+
+1. 已有人工校对文案：`POST https://autosubrt.jcaigc.cn/openapi/autosubrt/v1/asr/text/align`
+   传 `audio_url` + `text` + `max_chars_per_line`，返回的 `timelines` 是微秒，直接作为
+   `add_captions` 的 `start` / `end`。
+2. 没有文案：`POST .../asr` 拿分句与逐字时间线（毫秒），或 `POST .../asr/srt` 直接拿 SRT 文件本体。
+3. 只要纯文本：`POST .../asr/text`。
+
+ASR 按音频时长 0.00022 元/秒计费，需要 `apiKey`；调用前先告知用户。详细参数见
+[asr.md](asr.md) / [asr-text.md](asr-text.md) / [asr-srt.md](asr-srt.md) / [asr-text-align.md](asr-text-align.md)。
 
 ## 字幕默认规则
 

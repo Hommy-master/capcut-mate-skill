@@ -17,19 +17,23 @@
 - 路径前缀：`/openapi/capcut-mate/v1/`
 - 完整地址 = 基地址 + 路径前缀 + 接口名，例如
   `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/create_draft`
-- 除 `get_draft` 使用 `GET`、`upload_file` 使用 `multipart/form-data` 外，其余接口均使用 `POST JSON`。
+- `get_draft` 使用 `GET`，`upload_file` 使用 `multipart/form-data`，其余接口均使用 `POST JSON`。
 - 调用 `create_draft` / `add_*` 等接口**不需要** API Key。托管版的 `gen_video` 与 `upload_file` 需要 UUID 格式的 `apiKey`。
+- **语音识别（ASR）是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
+  按音频时长 0.00022 元/秒计费（识别成功后扣费），需要 `apiKey`；与剪映小助手共用充值余额。
 
 ## 认证与计费
 
 | 场景 | 是否需要 apiKey | 费用 |
 |---|---|---|
 | 创建草稿、添加素材、特效、字幕、查询等 | 否 | 免费 |
-| `upload_file` 托管版上传素材 | **是**，UUID 格式，用户自备 | 0.0005 元/MB（上传成功后扣费） |
-| `gen_video` 托管版导出视频 | **是**，UUID 格式，用户自备 | 0.3 元/分钟（SVIP 0.18 元/分钟） |
+| `upload_file` 托管版上传素材 | **是**，UUID 格式，用户自备 | 0.005 元/MB，单次最低 0.002 元（上传成功后扣费） |
+| `gen_video` 托管版导出视频 | **是**，UUID 格式，用户自备 | 0.3 元/分钟（VIP 0.24、SVIP 0.18 元/分钟） |
+| ASR（独立服务 `autosubrt.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 0.00022 元/秒（按音频时长，识别成功后扣费） |
 | 自部署实例 | 默认关闭校验（`ENABLE_APIKEY`） | 无托管费用 |
 
-托管版调用 `upload_file` / `gen_video` 时账户积分需大于 1，否则返回 `2035`。
+托管版调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；
+上传还需余额覆盖本次费用，导出会按草稿时长预估费用并提前校验余额。
 
 API Key 获取与充值：<https://www.jcaigc.cn>
 
@@ -97,8 +101,7 @@ node scripts/call-api.mjs --endpoint upload_file --file ./demo.mp4 --data '{"api
 ```
 
 返回的 `url` 是带签名的临时地址（默认 7 天），可直接作为 `add_videos` / `add_images` / `add_audios` 的素材地址。
-上传的是**临时文件**，同一个文件最多下载 **10 次**；只有下载剪映草稿时才会实际下载文件
-（`add_*` 调用不触发下载），超限或文件被删除后需要重新上传。
+只有下载剪映草稿时才会实际下载文件（`add_*` 调用只登记 URL，不触发下载）；URL 过期或文件被删除后需要重新上传。
 
 ## 草稿串联
 

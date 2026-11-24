@@ -38,6 +38,8 @@ POST /openapi/capcut-mate/v1/get_url
 
 ```json
 {
+  "code": 0,
+  "message": "success",
   "output": "[魂牵梦萦https://sf.com；中国人https://jcaigc.cn],\"[]\""
 }
 ```
@@ -48,11 +50,12 @@ POST /openapi/capcut-mate/v1/get_url
 |--------|------|------|
 | output | string | 提取结果 |
 
-### 错误响应 (4xx/5xx)
+### 错误响应
 
 ```json
 {
-  "detail": "错误信息描述"
+  "code": 1001,
+  "message": "参数校验失败"
 }
 ```
 
@@ -74,8 +77,8 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_url \
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | output是必填项 | 缺少output参数 | 提供有效的output参数 |
-| 500 | 提取链接失败 | 内部处理错误 | 联系技术支持 |
+| 1001 | 参数校验失败 | 缺少 output 参数（请求体未通过参数校验） | 提供有效的 output 参数 |
+| 9999 | 未知异常 | 内部处理异常 | 联系技术支持 |
 
 ## 注意事项
 

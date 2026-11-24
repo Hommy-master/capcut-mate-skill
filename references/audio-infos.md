@@ -31,7 +31,7 @@ POST /openapi/capcut-mate/v1/audio_infos
 | mp3_urls | array\[string] |✅ | - | 音频文件URL数组 |
 | timelines | array\[object] |✅ | - | 时间线配置数组 |
 | audio_effect | string |❌ | None | 音频效果名称 |
-| volume | number |❌ | 1.0 |音量大小(0.0-2.0) |
+| volume | number |❌ | None |音量大小(0.0-2.0) |
 
 ### 参数详解
 
@@ -58,7 +58,7 @@ POST /openapi/capcut-mate/v1/audio_infos
 
 * **类型**: number
 * **说明**: 音频音量大小
-* **默认值**: 1.0
+* **默认值**: None（不传则生成结果中不含该字段）
 * **范围**: 0.0 - 2.0
 * **示例**: 0.8 (80%音量)
 
@@ -68,21 +68,24 @@ POST /openapi/capcut-mate/v1/audio_infos
 
 ```json
 {
-  "infos": "[{\"audio_url\":\"https://assets.jcaigc.cn/audio1.mp3\",\"start\":0,\"end\":3000000,\"duration\":5000000,\"volume\":0.8,\"audio_effect\":\"reverb\"},{\"audio_url\":\"https://assets.jcaigc.cn/audio2.mp3\",\"start\":3000000,\"end\":8000000,\"duration\":8000000,\"volume\":1.0,\"audio_effect\":null}]"
+  "code": 0,
+  "message": "success",
+  "infos": "[{\"audio_url\":\"https://assets.jcaigc.cn/audio1.mp3\",\"start\":0,\"end\":3000000,\"audio_effect\":\"reverb\",\"volume\":0.8},{\"audio_url\":\"https://assets.jcaigc.cn/audio2.mp3\",\"start\":3000000,\"end\":8000000,\"audio_effect\":\"reverb\",\"volume\":0.8}]"
 }
 ```
 
-\###响应字段说明
+### 响应字段说明
 
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
 | infos | string |音信息JSON字符串 |
 
-\###错误响应 (4xx/5xx)
+### 错误响应
 
 ```json
 {
-  "detail": "错误信息描述"
+  "code": 1001,
+  "message": "参数校验失败"
 }
 ```
 
@@ -119,12 +122,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/audio_infos \
 
 |错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | mp3_urls是必填项 |缺少音频URL参数 | 提供有效的音频URL数组 |
-| 400 | timelines是必填项 |缺少时间线参数 | 提供有效的时间线数组 |
-| 400 | 数组长度不匹配 | mp3_urls和timelines长度不一致 |确保两个数组长度相同 |
-| 400 | volume值无效 |音不在0.0-2.0范围内 | 使用0.0-2.0之间的音量值 |
-| 404 |音频资源不存在 |音频URL无法访问 |检查音频URL是否可访问 |
-| 500 |音频信息生成失败 |内部处理错误 |联技术支持 |
+| 1001 | 参数校验失败 | 请求体未通过字段校验（缺少 `mp3_urls`/`timelines`、时间线项缺少 `start`/`end`，或类型错误） | 检查参数类型与必填字段 |
 
 ## 注意事项
 

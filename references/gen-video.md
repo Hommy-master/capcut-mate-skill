@@ -16,7 +16,8 @@ POST /openapi/capcut-mate/v1/gen_video
 
 ```json
 {
-  "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258"
+  "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
+  "apiKey": "123e4567-e89b-12d3-a456-426614174000"
 }
 ```
 
@@ -25,6 +26,7 @@ POST /openapi/capcut-mate/v1/gen_video
 | 参数名 | 类型 | 必填 | 默认值 | 说明 |
 |--------|------|------|--------|------|
 | draft_url | string | ✅ | - | 目标草稿的完整URL |
+| apiKey | string | 按服务端配置 | - | 合法 UUID；托管版 `ENABLE_APIKEY=true` 时必填 |
 
 ### 参数详解
 
@@ -77,17 +79,11 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/gen_video \
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | draft_url是必填项 | 缺少草稿URL参数 | 提供有效的draft_url |
-| 400 | draft_url格式无效 | URL格式不正确 | 检查URL格式是否正确 |
-| 404 | 草稿不存在 | 指定的草稿无法找到 | 确认草稿URL是否正确且存在 |
-| 400 | 草稿内容为空 | 草稿中没有可导出的内容 | 确保草稿包含视频、音频或图片素材 |
-| 400 | 素材无法访问 | 草稿中的素材文件无法下载 | 检查素材URL是否有效 |
-| 500 | 视频渲染失败 | 视频处理过程中出错 | 检查草稿内容或联系技术支持 |
-| 500 | 音频处理失败 | 音频混合过程中出错 | 检查音频格式或联系技术支持 |
-| 500 | 编码失败 | 最终视频编码失败 | 联系技术支持 |
-| 503 | 服务繁忙 | 渲染服务器负载过高 | 稍后重试 |
-| 504 | 处理超时 | 视频生成超时 | 简化草稿内容或稍后重试 |
-| 500 | 视频生成任务提交失败 | 内部处理错误 | 联系技术支持 |
+| 1001 | 参数校验失败 | `apiKey` 不是合法 UUID，或参数类型不正确 | 检查参数类型与必填字段 |
+| 2001 | 无效的草稿URL | `draft_url` 缺失或不含 `draft_id` | 传入 `create_draft` 返回的 `draft_url` |
+| 2035 | 充值余额不足 | 当前余额不大于 0，或不足以覆盖预估费用 | 前往 <https://jcaigc.cn/recharge> 充值后重试 |
+| 2036 | 无效的 apiKey | `ENABLE_APIKEY=true` 且未传 `apiKey` | 登录 <https://jcaigc.cn/user-info> 获取 apiKey |
+| 9998 | 系统内部错误 | 提交任务时发生未知错误 | 稍后重试或联系技术支持 |
 
 ## 注意事项
 
@@ -124,7 +120,8 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/gen_video \
 
 ## ⚠️ 实施提示（本技能补充）
 
-- 上方参数表只列了 `draft_url`，但线上导出**必须**携带 UUID 格式的 `apiKey`：`{"draft_url":"...","apiKey":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}`。
+- 托管版线上导出**必须**携带 UUID 格式的 `apiKey`：`{"draft_url":"...","apiKey":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}`；
+  自部署实例可通过 `ENABLE_APIKEY=false` 关闭校验。
 - 本接口只表示**任务已提交**，不返回视频地址，必须接着轮询 `gen-video-status.md`。
-- 计费：0.3 元/分钟，SVIP 0.18 元/分钟。调用前先与用户确认，不要在没有 `apiKey` 时盲目重试。
+- 计费：0.3 元/分钟，VIP 0.24 元/分钟、SVIP 0.18 元/分钟。调用前先与用户确认，不要在没有 `apiKey` 时盲目重试。
 - 导出通常在草稿下载完成后按需提示；用户不知道从哪里获取 `apiKey` 时，提示到 <https://jcaigc.cn> 获取。
