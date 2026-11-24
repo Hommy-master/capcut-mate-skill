@@ -7,7 +7,7 @@
 
 完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
 `upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
-图像生成、视频生成、音乐生成、语音网关与 autosubrt ASR 是独立服务，见下方单独章节。
+图像生成、视频生成、数字人、音乐生成、语音网关与 autosubrt ASR 是独立服务，见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -116,6 +116,23 @@
 支持的模型与单价见 [generate-video.md](generate-video.md)。轮询必须用同一把 `apiKey`；
 `failed` 全额退还，30 分钟未取结果会 `expired` 且不退预扣费用。
 
+## 数字人（复用视频网关）
+
+数字人没有单独端点，复用 `POST /v1/video/generations`；**方案由入参决定**：
+
+| 方案 | 入参 | 模型 | 单价 |
+|---|---|---|---|
+| 视频对口型 | `video_url` + `audio_url` | `videoretalk` | **0.08 元/秒** |
+| 图片说话 | `image_url` + `audio_url` | `wan2.2-s2v` | **480P 0.5 元/秒（默认）/ 720P 0.9 元/秒** |
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 提交数字人任务 | `POST /v1/video/generations` | POST | [digital-human.md](digital-human.md) |
+| 轮询任务结果 | `GET /v1/video/generations/{task_id}` | GET | [digital-human.md](digital-human.md) |
+
+图片说话音频 ≤20 秒；视频对口型音频可到 120 秒。模型必须与入参匹配；失败全额退还，
+30 分钟未取结果会 `expired` 且不退预扣费用。
+
 ## 音乐生成（独立网关）
 
 音乐生成走同一网关：基地址 `https://api.jcaigc.cn/v1`，鉴权用 `Authorization: Bearer <apiKey>`，
@@ -176,6 +193,7 @@ autosubrt ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，�
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
 | 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
 | 视频生成调用（独立网关） | `scripts/generate-video.mjs` | [generate-video.md](generate-video.md) |
+| 数字人调用（复用视频网关） | `scripts/generate-digital-human.mjs` | [digital-human.md](digital-human.md) |
 | 音乐生成调用（独立网关） | `scripts/generate-music.mjs` | [generate-music.md](generate-music.md) |
 | 语音识别调用（网关） | `scripts/transcribe-audio.mjs` | [voice-transcribe.md](voice-transcribe.md) |
 | 语音合成调用（网关） | `scripts/generate-speech.mjs` | [voice-tts.md](voice-tts.md) |
