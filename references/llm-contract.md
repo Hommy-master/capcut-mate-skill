@@ -14,6 +14,12 @@
 | gen_video | POST | `draft_url`；线上导出建议带 `apiKey` | 无 | 无（去查状态） |
 | gen_video_status | POST | `draft_url` | 无 | `status`, `video_url` |
 
+## 完成后的默认动作
+
+`save_draft` 后默认把草稿下载到本机剪映草稿目录，并告诉用户可以用剪映打开草稿查看成片。
+随后询问用户是否需要自动导出成片；需要时要求提供 `apiKey`，不知道从哪里获取时提示
+<https://jcaigc.cn>，再走 `gen_video` + `gen_video_status`。
+
 ## 最小请求体
 
 ### create_draft

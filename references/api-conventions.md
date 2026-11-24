@@ -110,7 +110,8 @@ node scripts/call-api.mjs --endpoint upload_file --file ./demo.mp4 --data '{"api
 
 ## 异步导出
 
-`gen_video` 只表示任务已提交，不返回视频文件。必须轮询 `gen_video_status`：
+导出是可选后续步骤：剪辑完成（`save_draft`）后默认先下载草稿到本机剪映草稿箱，
+再询问用户是否需要自动导出。`gen_video` 只表示任务已提交，不返回视频文件。必须轮询 `gen_video_status`：
 
 - 轮询间隔：每 3–5 秒一次，设置总超时（如 10 分钟）。
 - 状态机：

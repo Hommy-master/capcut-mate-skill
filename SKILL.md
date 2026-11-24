@@ -1,9 +1,9 @@
 ---
 name: jianchuang-jianying-assistant
-description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，需要异步导出成片，或者需要下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现）时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
+description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，剪辑完成后默认下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现），或需要异步导出成片时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate
 slug: jianchuang-jianying-assistant
-version: 2.3.5
+version: 2.4.0
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -81,8 +81,8 @@ disable: false
    → add_videos / add_images / add_audios / add_captions（可多次）
    → 可选增强：add_effects / add_filters / add_keyframes / add_masks / add_mask_keyframes / add_beauty / add_sticker / add_text_style
    → save_draft
-   → 可选导出：gen_video → 轮询 gen_video_status → video_url
-   → 可选下载安装：scripts/download-draft.mjs（完整下载 + 激活剪映发现）
+   → 默认下载安装：scripts/download-draft.mjs（完整下载 + 激活剪映发现），提示用户用剪映打开查看成片
+   → 按需导出：提示用户是否需要 gen_video（收费，需 apiKey）→ 轮询 gen_video_status → video_url
 ```
 
 编辑已有草稿时，要求用户提供本服务生成且仍可访问的 `draft_url`；改完再次调用 `save_draft`。
@@ -157,11 +157,14 @@ disable: false
 5. 所有时间均使用微秒。
 6. `image_infos`、`video_infos`、`audio_infos`、`captions`、`effect_infos`、`filter_infos`、`keyframes`
    是 JSON 字符串。
-7. 用户需要成片时走 `gen_video` + `gen_video_status`；**先告知收费**（0.3 元/分钟）并确认用户已备好 `apiKey`。
-   上传本地素材走 `upload_file`，同样**先告知收费**（0.0005 元/MB）并确认 `apiKey`。
-8. 只有用户要求下载或安装时才运行下载器。安装前确认目标是用户认可、存在且可写的剪映草稿根目录；
-   默认拒绝覆盖同名草稿，只有用户明确同意才加 `--replace`。下载器会下载草稿内引用的远程素材、
-   改写本地路径，并尝试激活剪映发现；未确认发现时不要向用户谎称草稿已出现在剪映首页。
+7. 剪辑完成后主动提示用户是否需要自动导出成片；需要时走 `gen_video` + `gen_video_status`，
+   **先告知收费**（0.3 元/分钟）并请用户提供 `apiKey`。用户不知道从哪里获取时，提示到
+   <https://jcaigc.cn> 获取。上传本地素材走 `upload_file`，同样**先告知收费**（0.0005 元/MB）
+   并确认 `apiKey`。
+8. **剪辑完成后默认下载草稿**（`save_draft` 之后）：运行下载器安装到本机剪映草稿目录，并告知用户
+   可以用剪映打开草稿查看成片；只有用户明确表示不需要时才跳过。安装前确认目标是用户认可、存在且可写的
+   剪映草稿根目录；默认拒绝覆盖同名草稿，只有用户明确同意才加 `--replace`。下载器会下载草稿内引用的
+   远程素材、改写本地路径，并尝试激活剪映发现；未确认发现时不要向用户谎称草稿已出现在剪映首页。
 
 ### 创建新草稿
 
@@ -169,8 +172,10 @@ disable: false
 2. `create_draft` 创建草稿。
 3. 直接用 `add_*` 写入素材与效果（自己构造 JSON 字符串）。
 4. `save_draft` 收尾并取得最终 `draft_url`。
-5. 需要成片 → `gen_video` → 轮询 `gen_video_status` → `video_url`。
-6. 需要下载或安装到本机 → 读 [references/download-draft.md](references/download-draft.md)。
+5. 默认下载草稿到本机剪映草稿目录，并告知用户可用剪映打开草稿查看成片；见
+   [references/download-draft.md](references/download-draft.md)。
+6. 询问用户是否需要自动导出成片；需要时 `gen_video` → 轮询 `gen_video_status` → `video_url`，
+   调用前告知收费并请用户提供 `apiKey`（不知道从哪获取时提示 <https://jcaigc.cn>）。
 
 ### 关键选择
 
@@ -189,8 +194,10 @@ disable: false
 - 需要控制遮挡关系时，按「先底层、后上层」的顺序调用 `add_*`：后添加的元素会盖住同一时间段的下层元素；
   音频是独立层，始终在最底层。
 - `easy_create_material` 只返回 `draft_url`；需要严格验收时改用独立的 `add_*` 接口。
-- 下载草稿前先确认剪映草稿根目录：优先让下载器自动探测；探测失败时再让用户从剪映设置中确认，
-  不要猜测或新建目录。
+- 剪辑完成后默认下载草稿到本机剪映草稿箱，并告知用户可用剪映打开草稿查看成片；只有用户明确拒绝才跳过。
+  下载前确认剪映草稿根目录：优先让下载器自动探测；探测失败时再让用户从剪映设置中确认，不要猜测或新建目录。
+- 下载完成后询问用户是否需要自动导出成片（`gen_video`，收费 0.3 元/分钟，需 `apiKey`）；
+  用户不知道 `apiKey` 从哪里获取时，提示到 <https://jcaigc.cn> 获取。
 - 下载完成后以结果中的 `installed`、`files.failure`、`jianyingDiscovered` 为准交付；
   `jianyingDiscovered:false` 时提示用户重新打开或重启剪映，不要说草稿已经出现在草稿箱。
 - 三图、字幕和背景音乐案例读取 [references/example-image-caption-bgm.md](references/example-image-caption-bgm.md)。
@@ -240,8 +247,10 @@ node scripts/download-draft.mjs --draft-url "<draft_url>" --draft-root "<剪映�
 ### 结果交付
 
 返回草稿内容与画布比例、最终 `draft_url`、关键处理步骤，以及未能完成的能力和原因。
-导出完成时返回 `video_url`；完成本地下载时返回 `draftDirectory`（未完整时为 `stagingDirectory`）、
-失败文件数与 `jianyingDiscovered`，并说明是否需要重开或重启剪映。
+完成本地下载时返回 `draftDirectory`（未完整时为 `stagingDirectory`）、失败文件数与 `jianyingDiscovered`，
+并明确告诉用户可以用剪映打开草稿查看成片；未确认发现时说明需要重开或重启剪映。
+随后主动询问是否需要自动导出成片（`gen_video`，收费，需 `apiKey`；获取地址 <https://jcaigc.cn>），
+用户确认并导出完成时返回 `video_url`。
 
 ## 使用前须知
 
@@ -249,7 +258,8 @@ node scripts/download-draft.mjs --draft-url "<draft_url>" --draft-root "<剪映�
   开源仓库 <https://github.com/Hommy-master/capcut-mate>（Apache-2.0，Gitee 镜像 <https://gitee.com/taohongmin-gitee/capcut-mate>）。
 - 创建与编辑草稿免费、无需 API Key；**托管版**导出成片按 0.3 元/分钟计费（SVIP 0.18 元/分钟），
   上传素材按 0.0005 元/MB 计费。不想付费可自部署后端（自部署导出依赖本地渲染，官方说明仅 Windows 可用）。
-- `apiKey` 只在用户主动提供时使用，不要索取或猜测。
+- `apiKey` 只在用户主动提供或明确同意后使用，不要猜测；导出成片时会提示用户提供，
+  不知道从哪里获取时引导到 <https://jcaigc.cn>。
 - 本地下载与安装支持 Windows 与 macOS 剪映；Linux 可用同一流程下载文件，但通常无法确认剪映发现。
   安装位置必须是用户确认、存在且可写的剪映草稿根目录。
 - 剪映版本或草稿格式变化后，个别效果可能存在兼容差异。

@@ -18,14 +18,18 @@
 1. `POST /create_draft` → 拿到 `draft_url`
 2. 按需要多次调用 `add_videos` / `add_images` / `add_audios` / `add_captions`
 3. 可选：`add_effects` / `add_filters` / `add_keyframes` / `add_masks`
-4. `POST /gen_video`（线上导出带 `apiKey`）
-5. 每 3–5 秒 `POST /gen_video_status`，直到 `status` 为 `completed` 或 `failed`
-6. 成功后使用响应里的 `video_url`
+4. 默认下载草稿到本机剪映草稿目录，并告诉用户可以用剪映打开草稿查看成片
+5. 询问用户是否需要自动导出成片；需要时要求提供 `apiKey`（不知道从哪里获取时提示 <https://jcaigc.cn>）
+6. `POST /gen_video`（线上导出带 `apiKey`）
+7. 每 3–5 秒 `POST /gen_video_status`，直到 `status` 为 `completed` 或 `failed`
+8. 成功后使用响应里的 `video_url`
 
 ```mermaid
 flowchart LR
   createDraft[create_draft] --> addMedia["add_videos / add_audios / add_images / add_captions"]
-  addMedia --> genVideo[gen_video]
+  addMedia --> download[下载草稿到剪映]
+  download --> ask{需要导出?}
+  ask -->|是| genVideo[gen_video]
   genVideo --> poll[gen_video_status]
   poll -->|pending or processing| poll
   poll -->|completed| videoUrl[video_url]

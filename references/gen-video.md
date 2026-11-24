@@ -127,3 +127,4 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/gen_video \
 - 上方参数表只列了 `draft_url`，但线上导出**必须**携带 UUID 格式的 `apiKey`：`{"draft_url":"...","apiKey":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}`。
 - 本接口只表示**任务已提交**，不返回视频地址，必须接着轮询 `gen-video-status.md`。
 - 计费：0.3 元/分钟，SVIP 0.18 元/分钟。调用前先与用户确认，不要在没有 `apiKey` 时盲目重试。
+- 导出通常在草稿下载完成后按需提示；用户不知道从哪里获取 `apiKey` 时，提示到 <https://jcaigc.cn> 获取。

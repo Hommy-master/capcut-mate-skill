@@ -77,7 +77,22 @@
 {"draft_url":"<draft_url>"}
 ```
 
-## 7. 可选：导出成片（收费）
+## 7. 默认：下载到剪映草稿箱
+
+剪辑完成后默认使用最终 `draft_url` 运行：
+
+```bash
+node scripts/download-draft.mjs --draft-url "<draft_url>"
+```
+
+下载器会一并下载草稿内引用的远程素材并激活剪映发现。完成后报告 `draftDirectory`
+与 `jianyingDiscovered`，并告诉用户可以用剪映打开草稿查看成片；未确认发现时提醒用户
+重新打开或重启剪映。详见 [download-draft.md](download-draft.md)。
+
+## 8. 可选：导出成片（收费）
+
+下载完成后询问用户是否需要自动导出；用户需要时要求提供 `apiKey`，不知道从哪里获取时
+提示到 <https://jcaigc.cn> 获取。
 
 `gen_video` → `POST /openapi/capcut-mate/v1/gen_video`
 
@@ -92,15 +107,3 @@ node scripts/poll-gen-video.mjs --draft-url "<draft_url>"
 ```
 
 直到 `status` 为 `completed`（读取 `video_url`）或 `failed`（读取 `error_message` 后停止）。
-
-## 8. 可选：下载到剪映草稿箱
-
-用户要求时，使用最终 `draft_url` 运行：
-
-```bash
-node scripts/download-draft.mjs --draft-url "<draft_url>"
-```
-
-下载器会一并下载草稿内引用的远程素材并激活剪映发现。完成后报告 `draftDirectory`
-与 `jianyingDiscovered`；未确认发现时提醒用户重新打开或重启剪映。详见
-[download-draft.md](download-draft.md)。
