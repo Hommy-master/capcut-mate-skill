@@ -8,7 +8,7 @@
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。图像生成、视频生成与语音网关是独立服务，另行计费。
+5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。图像生成、视频生成、音乐生成与语音网关是独立服务，另行计费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 8. **只能通过接口生成草稿**：除下载器安装时的素材本地化改写外，不要直接修改剪映草稿文件
@@ -27,6 +27,9 @@
     （0.00022 元/秒）；TTS `POST /v1/audio/speech` 默认 `seed-tts-2.0`
     （2.8 元/万字符）；声音复刻 `POST /v1/audio/voices` 默认 `cosyvoice-v3.5-plus`（9.9 元/个）。
     音色与模型必须配套。
+13. **音乐生成也是同一独立网关**：`POST /v1/music/generations` 提交，
+    `GET /v1/music/generations/{task_id}` 轮询；按次计费，默认 `minimax-music-2.0`（0.25 元/次）。
+    失败全额退还，30 分钟未取结果会 `expired` 且不退预扣费用。
 
 ## 默认工作流
 
@@ -105,6 +108,25 @@ flowchart LR
 `cosyvoice-v3.5-*` 没有系统音色，需先复刻。用户可换其它模型，但调用前要告知模型与费用。
 详见 [voice-transcribe.md](voice-transcribe.md)、[voice-tts.md](voice-tts.md)、
 [voice-clone.md](voice-clone.md)、[voice-voices.md](voice-voices.md)。
+
+## 可选：音乐生成（独立网关）
+
+需要 BGM/歌曲时，`POST https://api.jcaigc.cn/v1/music/generations`，
+请求头 `Authorization: Bearer <apiKey>`。**默认模型 `minimax-music-2.0`（0.25 元/次）**；
+用户未指定时用它，调用前告知单次价格，并说明可换 `minimax-music-3.0`（1 元/次）。
+
+```json
+{
+  "model": "minimax-music-2.0",
+  "prompt": "轻快的民谣流行，木吉他，男声温柔治愈",
+  "lyrics": "[Verse]\n晨光落在安静的窗台",
+  "output_format": "mp3"
+}
+```
+
+提交后返回 `task_id`，再 `GET /v1/music/generations/{task_id}` 轮询，`succeeded` 后读
+`audio_url` 或 `data[0].url`。按次计费；失败全额退还，30 分钟未取结果会 `expired`
+且不退预扣费用；音频地址默认 7 天有效。完整说明见 [generate-music.md](generate-music.md)。
 
 ## 可选：字幕/时间线 ASR（autosubrt，独立服务）
 

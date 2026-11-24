@@ -29,6 +29,8 @@
 - **语音网关也是同一独立网关**：`POST /v1/audio/transcriptions`（ASR）、`POST /v1/audio/speech`（TTS）、
   `POST /v1/audio/voices`（声音复刻）。ASR 默认 `volc.bigasr.auc_turbo`（0.00022 元/秒），
   TTS 默认 `seed-tts-2.0`（2.8 元/万字符），复刻默认 `cosyvoice-v3.5-plus`（9.9 元/个）。
+- **音乐生成也是同一独立网关**：`POST /v1/music/generations` 提交，`GET /v1/music/generations/{task_id}`
+  轮询；按次计费，默认 `minimax-music-2.0`（0.25 元/次）。
 
 ## 认证与计费
 
@@ -41,6 +43,7 @@
 | 图像生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedream-5-0-flash` 0.12 元/张；其它模型 0.2–1.12 元/张（Gemini 按 1K/2K/4K 分档） |
 | 视频生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedance-2.0` + 480P 0.45 元/秒；其它文生/图生视频模型与分辨率 0.22–5 元/秒 |
 | 语音网关（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | ASR 默认 0.00022 元/秒；TTS 默认 2.8 元/万字符；声音复刻默认 9.9 元/个 |
+| 音乐生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `minimax-music-2.0` 0.25 元/次；`minimax-music-3.0` 1 元/次 |
 | 自部署实例 | 默认关闭校验（`ENABLE_APIKEY`） | 无托管费用 |
 
 托管版调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；

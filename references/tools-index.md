@@ -7,7 +7,7 @@
 
 完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
 `upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
-语音、ASR、图像生成与视频生成是独立服务，见下方单独章节。
+图像生成、视频生成、音乐生成、语音网关与 autosubrt ASR 是独立服务，见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -116,6 +116,21 @@
 支持的模型与单价见 [generate-video.md](generate-video.md)。轮询必须用同一把 `apiKey`；
 `failed` 全额退还，30 分钟未取结果会 `expired` 且不退预扣费用。
 
+## 音乐生成（独立网关）
+
+音乐生成走同一网关：基地址 `https://api.jcaigc.cn/v1`，鉴权用 `Authorization: Bearer <apiKey>`，
+**按次计费**，异步提交后轮询。**默认 `minimax-music-2.0`（0.25 元/次）**；
+用户未指定时用它，调用前告知单次价格，并可换 `minimax-music-3.0`（1 元/次）。
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 提交音乐生成 | `POST /v1/music/generations` | POST | [generate-music.md](generate-music.md) |
+| 轮询任务结果 | `GET /v1/music/generations/{task_id}` | GET | [generate-music.md](generate-music.md) |
+| 查询当前可用模型 | `GET /v1/models` | GET | [generate-music.md](generate-music.md) |
+
+一次任务生成一首完整的歌；失败全额退还，30 分钟未取结果会 `expired` 且不退预扣费用；
+结果音频地址默认 7 天有效。
+
 ## 语音（独立网关）
 
 语音识别、语音合成与声音复刻走独立网关：基地址 `https://api.jcaigc.cn/v1`，
@@ -161,6 +176,7 @@ autosubrt ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，�
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
 | 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
 | 视频生成调用（独立网关） | `scripts/generate-video.mjs` | [generate-video.md](generate-video.md) |
+| 音乐生成调用（独立网关） | `scripts/generate-music.mjs` | [generate-music.md](generate-music.md) |
 | 语音识别调用（网关） | `scripts/transcribe-audio.mjs` | [voice-transcribe.md](voice-transcribe.md) |
 | 语音合成调用（网关） | `scripts/generate-speech.mjs` | [voice-tts.md](voice-tts.md) |
 | 声音复刻调用（网关） | `scripts/clone-voice.mjs` | [voice-clone.md](voice-clone.md) |
