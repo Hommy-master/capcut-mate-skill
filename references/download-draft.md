@@ -22,8 +22,9 @@
    | 平台 | 默认草稿根目录 |
    |---|---|
    | Windows | `%LOCALAPPDATA%\JianyingPro\User Data\Projects\com.lveditor.draft` |
-   | macOS（剪映） | `~/Movies/JianyingPro/User Data/Projects/com.lveditor.draft` |
-   | macOS（CapCut） | `~/Movies/CapCut/User Data/Projects/com.lveditor.draft` |
+   | macOS | `~/Movies/JianyingPro/User Data/Projects/com.lveditor.draft` |
+
+   > 剪映草稿目录在 macOS 上是 `Movies/JianyingPro/...`，不是 `Movies/CapCut/...`。
 
 4. 建议先关闭剪映；下载完成后重新打开或刷新草稿箱。
 

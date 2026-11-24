@@ -361,10 +361,7 @@ export function discoverDraftRoots(
   homeDirectory = homedir(),
   environment = process.env,
 ) {
-  const candidates = [
-    environment.JIANYING_DRAFT_ROOT,
-    environment.CAPCUT_DRAFT_ROOT,
-  ];
+  const candidates = [environment.JIANYING_DRAFT_ROOT];
   if (platform === "win32") {
     const localAppData =
       environment.LOCALAPPDATA ??
@@ -380,14 +377,6 @@ export function discoverDraftRoots(
     );
   } else if (platform === "darwin") {
     candidates.push(
-      posix.join(
-        homeDirectory,
-        "Movies",
-        "CapCut",
-        "User Data",
-        "Projects",
-        "com.lveditor.draft",
-      ),
       posix.join(
         homeDirectory,
         "Movies",
