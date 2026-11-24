@@ -153,6 +153,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_audios \
 5. **网络访问**: 音频URL必须可以正常访问
 6. **音量范围**: 音量值必须在0.0-2.0范围内
 7. **轨道限制**: 同一时间段可能存在音频重叠
+8. **图层位置**: 音频是独立层，始终位于所有轨道的最底层
 
 ## 工作流程
 

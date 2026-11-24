@@ -1087,6 +1087,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_images \
 7. **位置参数**: `transform_x` / `transform_y` 单位为像素，内部按**草稿画布宽高**转换为半画布单位
 8. **轨道管理**: 系统自动创建视频轨道（图片以 `VideoSegment` 形式添加）
 9. **性能考虑**: 避免同时添加大量图片
+10. **图层顺序**: 先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 

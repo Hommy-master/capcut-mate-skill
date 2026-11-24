@@ -1466,6 +1466,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_effects \
 3. **时间范围**: end必须大于start
 4. **轨道管理**: 系统自动创建特效轨道
 5. **性能考虑**: 避免同时添加大量特效
+6. **图层顺序**: 先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 

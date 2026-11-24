@@ -178,6 +178,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_sticker \
    * transform_y转换公式：实际值 / 540（假设画布高度1080）
 6. **轨道管理**: 系统自动创建贴纸轨道
 7. **性能考虑**: 避免同时添加大量贴纸
+8. **图层顺序**: 先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 

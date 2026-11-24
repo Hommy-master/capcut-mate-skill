@@ -10,6 +10,7 @@
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
 5. 仅托管版的 `gen_video`（0.3 元/分钟）与 `upload_file`（0.0005 元/MB）收费，需要 `apiKey`（UUID）。其余接口免费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
+7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 
 ## 默认工作流
 

@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，需要异步导出成片，或者需要下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现）时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate
 slug: jianchuang-jianying-assistant
-version: 2.3.2
+version: 2.3.3
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -56,6 +56,8 @@ disable: false
    （建议每 3–5 秒一次），直到 `status` 为 `completed` 或 `failed`。`failed` 时读取 `error_message` 并停止，不要死循环。
 7. 请求方式：`get_draft` 是唯一的 `GET`（`draft_id` 走 query 参数）；`upload_file` 是唯一的
    `multipart/form-data`；其余接口全部是 `POST JSON`。
+8. **图层顺序**：图片、视频、特效、滤镜、字幕、贴纸按添加顺序叠放，先添加的在底层、后添加的在上层；
+   音频是独立层，始终在最底层轨道；时间线重合时会互相遮挡。
 
 ## 怎样使用
 
@@ -181,6 +183,8 @@ disable: false
 - 本地文件先 `upload_file` 换成公网 URL，再进入 `add_*`；返回的是**临时文件**地址（默认 7 天有效期，
   且同一个文件最多下载 10 次）。只有**下载剪映草稿**时才真正下载文件，`add_*` 调用不触发下载、
   不消耗次数；重复下载同一草稿会反复消耗次数，文件被删除后需重新上传。
+- 需要控制遮挡关系时，按「先底层、后上层」的顺序调用 `add_*`：后添加的元素会盖住同一时间段的下层元素；
+  音频是独立层，始终在最底层。
 - `easy_create_material` 只返回 `draft_url`；需要严格验收时改用独立的 `add_*` 接口。
 - 下载草稿前先确认剪映草稿根目录：优先让下载器自动探测；探测失败时再让用户从剪映设置中确认，
   不要猜测或新建目录。

@@ -1544,6 +1544,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
 5. **花字名称**：请通过 `get_text_effects` 获取可用名称或 `effect_id`
 6. **坐标系统**：`transform_x` / `transform_y` 使用像素，内部会按画布尺寸换算
 7. **关键词阴影**：与关键词颜色/描边一样写在同一字幕的 styles 分区内，不另建字幕行；整段阴影仍由 `has_shadow` / `shadow_info` 控制
+8. **图层顺序**：先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 

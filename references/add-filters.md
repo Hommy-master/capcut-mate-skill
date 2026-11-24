@@ -1213,6 +1213,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_filters \
 4. **强度范围**: intensity必须在0-100之间，默认为100
 5. **轨道管理**: 系统自动创建滤镜轨道
 6. **性能考虑**: 避免同时添加大量滤镜
+7. **图层顺序**: 先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 

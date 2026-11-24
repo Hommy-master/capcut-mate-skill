@@ -730,6 +730,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_videos \
 7. **转场限制**: 转场时长有固定范围限制
 8. **性能考虑**: 批量添加大量视频可能影响性能
 9. **变速功能**: scene_timelines是对象数组，长度应与video_infos数组长度一致
+10. **图层顺序**: 先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 
