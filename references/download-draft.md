@@ -147,9 +147,9 @@ export JIANYING_DRAFT_ROOT="$HOME/Movies/JianyingPro/User Data/Projects/com.lved
   确实需要覆盖时加 `--replace`。
 - **`get_draft` 返回裸文件名**：补 `--file-base "https://<文件下载基地址>/"`。
   当前托管版通常返回完整 URL，不需要该参数。
-- **素材下载失败或已失效**：草稿素材若来自 `upload_file`，属于**临时文件，最多下载 10 次**。
-  下载草稿（包括重复下载）才会实际下载文件并消耗次数，`add_*` 调用不会。
-  超限或文件被删除后系统自动清理，只能重新上传并替换草稿中的 URL。
+- **素材下载失败或已失效**：草稿素材若来自 `upload_file`，返回的是带签名的临时 URL（默认 7 天）。
+  下载草稿时才会实际下载文件，`add_*` 调用只登记 URL。URL 过期或文件被删除后无法再读取，
+  只能重新上传并替换草稿中的 URL。
 - **自部署实例**：文件域名不在 `jcaigc.cn` 下时，用
   `CAPCUT_MATE_EXTRA_HOSTS=host1,host2` 显式声明（精确匹配，不支持子域后缀）。
   官方域名族强制 HTTPS，显式声明的主机允许 HTTP。

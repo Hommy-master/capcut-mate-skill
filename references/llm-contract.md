@@ -1,6 +1,6 @@
 # 精简契约
 
-> 摘自官方《精简契约》 https://docs.jcaigc.cn/guide/llm-contract.zh.html ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
+> 摘自官方《精简契约》 https://docs.jcaigc.cn/capcut-mate/llm-contract.zh ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
 
 ## 核心接口一览
 
@@ -10,7 +10,7 @@
 | add_videos | POST | `draft_url`, `video_infos` | `video_infos` | `draft_url`, `segment_ids` |
 | add_audios | POST | `draft_url`, `audio_infos` | `audio_infos` | `draft_url` |
 | add_images | POST | `draft_url`, `image_infos` | `image_infos` | `draft_url`, `segment_ids` |
-| add_captions | POST | `draft_url`, `captions` | `captions` | `draft_url` |
+| add_captions | POST | `draft_url`, `captions` | `captions` | `draft_url`, `segment_ids` |
 | gen_video | POST | `draft_url`；线上导出建议带 `apiKey` | 无 | 无（去查状态） |
 | gen_video_status | POST | `draft_url` | 无 | `status`, `video_url` |
 
@@ -45,7 +45,7 @@
 }
 ```
 
-`video_infos` 数组项常用字段：`video_url`（必填，http/https）、`start`、`end`；可选 `duration`、`volume`、`transition`、`transition_duration`、`mask`。
+`video_infos` 数组项常用字段：`video_url`（必填，http/https）、`start`、`end`；可选 `duration`、`volume`、`transition`、`transition_duration`；`mask` 会被接受但 `add_videos` 不生效，遮罩请改用 `add_masks`。
 
 ### add_audios
 
@@ -107,13 +107,33 @@
 
 | 接口 | 必填 | 备注 |
 |------|------|------|
-| upload_file | `file`（multipart），托管版带 `apiKey` | **收费** 0.0005 元/MB；返回 url 可直接给 `add_*` 用；临时文件最多下载 10 次（仅下载草稿触发），被删除后需重传 |
+| upload_file | `file`（multipart），托管版带 `apiKey` | **收费** 0.005 元/MB（单次最低 0.002 元）；返回 url 可直接给 `add_*` 用；签名 URL 默认 7 天有效 |
 | add_effects | `draft_url`, `effect_infos` | `effect_infos` 为 JSON 字符串 |
 | add_filters | `draft_url`, `filter_infos` | `filter_infos` 为 JSON 字符串 |
 | add_keyframes | `draft_url`, `keyframes` | `keyframes` 为 JSON 字符串 |
 | add_masks | `draft_url`, `segment_ids`, `name` | 先有视频/图片片段 |
 | add_sticker | `draft_url`, `sticker_id`, `start`, `end` | sticker_id 来自 search_sticker |
+| get_filters | `mode`（可选 0/1/2） | 查询合法 `filter_title`，免费 |
+| get_effects | `mode`（可选 0/1/2） | 查询合法 `effect_title`，免费 |
 | save_draft | `draft_url` | 通常可省略，写接口会落盘 |
+
+## 语音识别（ASR，独立服务）
+
+Base URL `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，按音频时长
+0.00022 元/秒计费，需要 `apiKey`。
+
+```json
+// POST /openapi/autosubrt/v1/asr/text/align
+{
+  "audio_url": "https://example.com/audio.mp3",
+  "text": "多谢，请入席吧。",
+  "max_chars_per_line": 15,
+  "apiKey": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+响应中的 `timelines` 为微秒，可直接作为 `add_captions` 的 `start` / `end`。
+`asr` / `asr_srt` 返回毫秒，注意换算。
 
 ## 相关文档
 

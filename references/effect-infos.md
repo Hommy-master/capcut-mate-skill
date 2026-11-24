@@ -35,21 +35,24 @@ POST /openapi/capcut-mate/v1/effect_infos
 
 ```json
 {
-  "infos": "[{\"effect\":\"blur\",\"start\":0,\"end\":3000000,\"duration\":5000000},{\"effect\":\"vignette\",\"start\":3000000,\"end\":6000000,\"duration\":5000000}]"
+  "code": 0,
+  "message": "success",
+  "infos": "[{\"effect_title\":\"blur\",\"start\":0,\"end\":3000000},{\"effect_title\":\"vignette\",\"start\":3000000,\"end\":6000000}]"
 }
 ```
 
-\###响应字段说明
+### 响应字段说明
 
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
 | infos | string |特效信息JSON字符串 |
 
-\###错误响应 (4xx/5xx)
+### 错误响应
 
 ```json
 {
-  "detail": "错误信息描述"
+  "code": 1001,
+  "message": "参数校验失败"
 }
 ```
 
@@ -83,16 +86,13 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/effect_infos \
 
 |错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | effects是必填项 |缺少特效名称参数 | 提供有效的特效名称数组 |
-| 400 | timelines是必填项 |缺少时间线参数 | 提供有效的时间线数组 |
-| 400 | 数组长度不匹配 | effects和timelines长度不一致 |确保两个数组长度相同 |
-| 500 |特效信息生成失败 |内部处理错误 |联技术支持 |
+| 1001 | 参数校验失败 | 请求体未通过字段校验（缺少 `effects`/`timelines`、时间线项缺少 `start`/`end`，或类型错误） | 检查参数类型与必填字段 |
 
 ## 注意事项
 
 1. **数组匹配**: effects和timelines数组长度必须相同
 2. **时间单位**:所有时间参数使用微秒（1秒 = 1,000,000微秒）
-3. **特效名称**:需要使用系统支持的特效名称
+3. **特效名称**:需要使用系统支持的特效名称；输出字段名为 `effect_title`，可直接用于 `add_effects` 的 `effect_infos`
 4. **连续性**:特效按时间线顺序应用
 
 \##工作流程

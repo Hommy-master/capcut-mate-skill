@@ -65,6 +65,8 @@ export const ENDPOINTS = new Set([
   "get_image_animations",
   "get_text_animations",
   "get_text_effects",
+  "get_effects",
+  "get_filters",
   "search_sticker",
   "get_url",
   // 格式转换
@@ -100,10 +102,11 @@ export const PAID_ENDPOINTS = new Set(["gen_video", "upload_file"]);
 
 /** 收费接口的调用前提示。 */
 const PAID_HINTS = {
-  gen_video: "提示：gen_video 为收费接口（0.3 元/分钟），线上导出需要 apiKey。\n",
+  gen_video:
+    "提示：gen_video 为收费接口（0.3 元/分钟；VIP 0.24、SVIP 0.18 元/分钟），线上导出需要 apiKey。\n",
   upload_file:
-    "提示：upload_file 为收费接口（0.0005 元/MB），托管版上传需要 apiKey；" +
-    "上传的是临时文件，最多下载 10 次（仅下载草稿时触发，add_* 不消耗）；文件被删除后需要重新上传。\n",
+    "提示：upload_file 为收费接口（0.005 元/MB，单次最低 0.002 元），托管版上传需要 apiKey；" +
+    "返回带签名的临时 URL（默认 7 天有效），过期后需要重新上传。\n",
 };
 
 /** 上传文件的 MIME 类型（服务端按扩展名校验，这里只为请求头更准确）。 */

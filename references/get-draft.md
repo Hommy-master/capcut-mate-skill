@@ -35,12 +35,12 @@ GET /openapi/capcut-mate/v1/get_draft
 
 ```json
 {
+  "code": 0,
+  "message": "success",
   "files": [
-    "2f52a63b-8c6a-4417-8b01-1b2a569ccb6c.json",
-    "video_123456789.mp4",
-    "audio_987654321.mp3",
-    "image_555666777.jpg",
-    "thumbnail_888999000.png"
+    "https://capcut-mate.jcaigc.cn/output/draft/2025092811473036584258/draft_info.json",
+    "https://capcut-mate.jcaigc.cn/output/draft/2025092811473036584258/draft_content.json",
+    "https://capcut-mate.jcaigc.cn/output/draft/2025092811473036584258/draft_meta_info.json"
   ]
 }
 ```
@@ -49,13 +49,14 @@ GET /openapi/capcut-mate/v1/get_draft
 
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
-| files | array | 草稿相关的文件列表 |
+| files | array | 草稿内文件的下载URL列表 |
 
-### 错误响应 (4xx/5xx)
+### 错误响应
 
 ```json
 {
-  "detail": "错误信息描述"
+  "code": 2001,
+  "message": "无效的草稿URL"
 }
 ```
 
@@ -81,12 +82,8 @@ curl -X GET "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draf
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | draft_id是必填项 | 缺少draft_id参数 | 提供有效的draft_id |
-| 400 | draft_id长度无效 | draft_id长度不在20-32位范围内 | 检查draft_id格式是否正确 |
-| 400 | draft_id格式无效 | draft_id格式不正确 | 确保使用正确的草稿ID格式 |
-| 404 | 草稿不存在 | 指定的草稿ID无法找到 | 确认草稿ID是否正确且存在 |
-| 500 | 获取文件列表失败 | 内部服务错误 | 联系技术支持或稍后重试 |
-| 503 | 服务不可用 | 系统维护中 | 稍后重试 |
+| 1001 | 参数校验失败 | `draft_id` 缺失或长度不在 20-32 位之间 | 传入 20-32 位的 `draft_id` |
+| 2001 | 无效的草稿URL | 草稿目录不存在 | 确认 `draft_id` 是否正确且草稿存在 |
 
 ## 注意事项
 
@@ -116,5 +113,7 @@ curl -X GET "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draf
 
 ## ⚠️ 实施提示（本技能补充）
 
-- 官方响应示例中的 `files` 是**文件名**（如 `2f52a63b-....json`），不一定是可下载的完整 URL。本地下载脚本 `scripts/download-draft.mjs`（旧入口 `scripts/install-draft.mjs`）同时兼容「完整 URL」与「裸文件名」两种返回；裸文件名需要 `--file-base`。详见 [download-draft.md](download-draft.md)。
+- 官方响应示例中的 `files` 是**可下载的完整 URL**。历史上也出现过返回裸文件名的情况，本地下载脚本
+  `scripts/download-draft.mjs`（旧入口 `scripts/install-draft.mjs`）同时兼容两种返回；裸文件名需要
+  `--file-base`。详见 [download-draft.md](download-draft.md)。
 - 本接口是唯一使用 `GET` 的接口，`draft_id` 走 query 参数，而不是 JSON body。

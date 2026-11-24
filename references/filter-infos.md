@@ -29,7 +29,7 @@ POST /openapi/capcut-mate/v1/filter_infos
 |--------|------|------|--------|------|
 | filters | array\[string] | ✅ | - | 滤镜名称数组 |
 | timelines | array\[object] | ✅ | - | 时间线配置数组 |
-| intensities | array\[number] | ❌ | 100 | 滤镜强度数组(0-100)，可选，默认全部为100 |
+| intensities | array\[number] | ❌ | None | 滤镜强度数组(0-100)，可选，不传时全部按 100 处理 |
 
 ## 响应格式
 
@@ -37,6 +37,8 @@ POST /openapi/capcut-mate/v1/filter_infos
 
 ```json
 {
+  "code": 0,
+  "message": "success",
   "infos": "[{\"filter_title\":\"复古\",\"start\":0,\"end\":3000000,\"intensity\":80},{\"filter_title\":\"黑白\",\"start\":3000000,\"end\":6000000,\"intensity\":100}]"
 }
 ```
@@ -47,11 +49,12 @@ POST /openapi/capcut-mate/v1/filter_infos
 |--------|------|------|
 | infos | string | 滤镜信息JSON字符串 |
 
-### 错误响应 (4xx/5xx)
+### 错误响应
 
 ```json
 {
-  "detail": "错误信息描述"
+  "code": 1001,
+  "message": "参数校验失败"
 }
 ```
 
@@ -98,11 +101,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/filter_infos \
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | filters是必填项 | 缺少滤镜名称参数 | 提供有效的滤镜名称数组 |
-| 400 | timelines是必填项 | 缺少时间线参数 | 提供有效的时间线数组 |
-| 400 | 数组长度不匹配 | filters、timelines、intensities长度不一致 | 确保所有数组长度相同 |
-| 400 | 强度范围无效 | intensity必须在0-100之间 | 提供有效的强度值 |
-| 500 | 滤镜信息生成失败 | 内部处理错误 | 联系技术支持 |
+| 1001 | 参数校验失败 | 请求体未通过字段校验（缺少 `filters`/`timelines`、时间线项缺少 `start`/`end`，或类型错误） | 检查参数类型与必填字段 |
 
 ## 注意事项
 

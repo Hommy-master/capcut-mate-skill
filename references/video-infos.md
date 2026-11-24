@@ -8,7 +8,7 @@ POST /openapi/capcut-mate/v1/video_infos
 
 ## 功能描述
 
-根据视频URL和时间线生成视频信息。该接口将视频文件URL和时间线配置转换为剪映草稿所需的视频信息格式，支持遮罩和转场设置。
+根据视频URL和时间线生成视频信息。该接口将视频文件URL和时间线配置转换为剪映草稿所需的视频信息格式，支持转场设置；`mask` 会写入结果但 `add_videos` 不会应用，遮罩请用 `add_masks`。
 
 ## 请求参数
 
@@ -21,7 +21,7 @@ POST /openapi/capcut-mate/v1/video_infos
   ],
   "height": 1080,
   "width": 1920,
-  "mask": "circle",
+  "mask": "圆形",
   "transition": "叠化",
   "transition_duration": 300000,
   "volume": 1.0
@@ -34,12 +34,12 @@ POST /openapi/capcut-mate/v1/video_infos
 |--------|------|------|--------|------|
 | video_urls | array\[string] |✅ | - |视频文件URL数组 |
 | timelines | array\[object] |✅ | - | 时间线配置数组 |
-| height | number |❌ | 1080 |视频高度 |
-| width | number |❌ | 1920 |视频宽度 |
-| mask | string |❌ | None |遮罩类型 |
+| height | integer |❌ | None |视频高度 |
+| width | integer |❌ | None |视频宽度 |
+| mask | string |❌ | None |遮罩名称：圆形、矩形、爱心、星形；会写入 `video_infos`，但 `add_videos` 不会应用——请用 `add_masks` |
 | transition | string |❌ | None |转场名称，可用值见 [add_videos](add-videos.md) |
-| transition_duration | number |❌ | 300000 |转场时长(微秒) |
-| volume | number |❌ | 1.0 |音量大小(0.0-2.0) |
+| transition_duration | integer |❌ | None |转场时长(微秒) |
+| volume | number |❌ | 1.0 |音量大小(0-10) |
 
 ### 可用转场名称
 
@@ -51,7 +51,7 @@ POST /openapi/capcut-mate/v1/video_infos
 
 ```json
 {
-  "infos": "[{\"video_url\":\"https://assets.jcaigc.cn/video1.mp4\",\"start\":0,\"end\":3000000,\"duration\":5000000,\"height\":1080,\"width\":1920,\"mask\":\"circle\",\"transition\":\"叠化\",\"transition_duration\":300000,\"volume\":1.0},{\"video_url\":\"https://assets.jcaigc.cn/video2.mp4\",\"start\":3000000,\"end\":6000000,\"duration\":5000000,\"height\":1080,\"width\":1920,\"mask\":\"circle\",\"transition\":\"叠化\",\"transition_duration\":300000,\"volume\":1.0}]"
+  "infos": "[{\"video_url\":\"https://assets.jcaigc.cn/video1.mp4\",\"start\":0,\"end\":3000000,\"duration\":3000000,\"height\":1080,\"width\":1920,\"mask\":\"圆形\",\"transition\":\"叠化\",\"transition_duration\":300000,\"volume\":1.0},{\"video_url\":\"https://assets.jcaigc.cn/video2.mp4\",\"start\":3000000,\"end\":6000000,\"duration\":3000000,\"height\":1080,\"width\":1920,\"mask\":\"圆形\",\"transition\":\"叠化\",\"transition_duration\":300000,\"volume\":1.0}]"
 }
 ```
 
@@ -86,7 +86,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/video_infos \
   }'
 ```
 
-#### 2.带遮罩和转场的视频信息
+#### 2.带转场的视频信息（其中的 `mask` 不会生效，见 `add_masks`）
 
 ```bash
 curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/video_infos \
@@ -116,7 +116,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/video_infos \
 1. **数组匹配**: video_urls和timelines数组长度必须相同
 2. **时间单位**:所有时间参数使用微秒（1秒 = 1,000,000微秒）
 3. **分辨率设置**: height和width参数用于设置视频显示分辨率
-4. **遮罩类型**:支持circle、rectangle等遮罩类型
+4. **遮罩类型**:`mask` 会以圆形、矩形、爱心或星形写入 `video_infos`，但 `add_videos` 不会应用，遮罩请用 `add_masks`
 5. **音量范围**: volume值必须在0.0-2.0范围内
 6. **网络访问**:视频URL必须可以正常访问
 
@@ -126,7 +126,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/video_infos \
 2.检查数组长度匹配
 3.验证时间线参数有效性
 4\. 设置视频分辨率参数
-5.应用遮罩和转场参数
+5.应用转场参数并透传 `mask`（`add_videos` 不会应用）
 6\. 为每个视频URL生成对应的视频信息
 7.将信息转换为JSON字符串格式
 8\. 返回处理结果

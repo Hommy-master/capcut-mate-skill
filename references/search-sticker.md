@@ -8,7 +8,7 @@ POST /openapi/capcut-mate/v1/search_sticker
 
 ## 功能描述
 
-根据关键词搜索贴纸。该接口用于根据用户提供的关键词搜索相关的贴纸素材，返回匹配的贴纸列表，包括贴纸的详细信息如图片URL、尺寸、类型等。
+根据关键词搜索贴纸。该接口用于根据用户提供的关键词搜索相关的贴纸素材，返回匹配的贴纸列表，包括贴纸标题、`sticker_id` 与预览图 URL。
 
 ## 请求参数
 
@@ -38,23 +38,13 @@ POST /openapi/capcut-mate/v1/search_sticker
 
 ```json
 {
+  "code": 0,
+  "message": "success",
   "data": [
     {
-      "sticker": {
-        "large_image": {
-          "image_url": "https://p3-heycan-jy-sign.byteimg.com/tos-cn-i-3jr8j4ixpe/29351205dbd943658d94c8feb17e5ed4~tplv-3jr8j4ixpe-resize:1920:1920.png?x-expires=1797257777&x-signature=r18I9uLQzgm%2FcvF8WNLbgw8BRwg%3D"
-        },
-        "preview_cover": "",
-        "sticker_package": {
-          "height_per_frame": 540,
-          "size": 305932,
-          "width_per_frame": 540
-        },
-        "sticker_type": 1,
-        "track_thumbnail": "https://p3-heycan-jy-sign.byteimg.com/tos-cn-i-3jr8j4ixpe/29351205dbd943658d94c8feb17e5ed4~tplv-3jr8j4ixpe-resize:120:120.png?x-expires=1797257777&x-signature=NqeKYGyeqIjCzF0Ls07ctnP%2BehI%3D&format=.png"
-      },
+      "title": "大笑",
       "sticker_id": "7521200021564427545",
-      "title": "大笑"
+      "image_url": "https://p3-heycan-jy-sign.byteimg.com/tos-cn-i-3jr8j4ixpe/29351205dbd943658d94c8feb17e5ed4~tplv-3jr8j4ixpe-resize:1920:1920.png?x-expires=1797257777&x-signature=r18I9uLQzgm%2FcvF8WNLbgw8BRwg%3D"
     }
   ]
 }
@@ -65,24 +55,19 @@ POST /openapi/capcut-mate/v1/search_sticker
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
 | data | array | 贴纸数据列表 |
-| sticker | object | 贴纸详细信息 |
-| large_image | object | 大图信息 |
-| image_url | string | 图片URL |
-| preview_cover | string | 预览封面 |
-| sticker_package | object | 贴纸包信息 |
-| height_per_frame | number | 每帧高度 |
-| size | number | 贴纸包大小 |
-| width_per_frame | number | 每帧宽度 |
-| sticker_type | number | 贴纸类型 |
-| track_thumbnail | string | 轨道缩略图 |
-| sticker_id | string | 贴纸ID |
-| title | string | 贴纸标题 |
+| title | string | 贴纸标题（唯一的搜索键） |
+| sticker_id | string | 贴纸ID，`add_sticker` 的入参 |
+| image_url | string | 贴纸预览图URL（1920×1920） |
 
-### 错误响应 (4xx/5xx)
+> 早期版本还返回 `sticker.large_image`、`sticker.track_thumbnail`、`sticker.sticker_package`、
+> `sticker.sticker_type`、`sticker.preview_cover` 等字段，现已移除；响应结构由嵌套改为扁平。
+
+### 错误响应
 
 ```json
 {
-  "detail": "错误信息描述"
+  "code": 1001,
+  "message": "参数校验失败"
 }
 ```
 
@@ -114,7 +99,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/search_sticker
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | keyword是必填项 | 缺少关键词参数 | 提供有效的keyword参数 |
+| 1001 | 参数校验失败 | 缺少 keyword 参数（请求体未通过参数校验） | 提供有效的 keyword 参数 |
 
 ## 注意事项
 

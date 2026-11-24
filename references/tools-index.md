@@ -5,8 +5,9 @@
 
 统一基地址：`https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`
 
-完整地址 = 基地址 + `/{接口名}`。除 `get_draft` 使用 `GET`、`upload_file` 使用 `multipart/form-data` 外，
-其余接口全部使用 `POST JSON`。
+完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
+`upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
+ASR 是独立服务（基地址 `https://autosubrt.jcaigc.cn`），见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -14,7 +15,7 @@
 
 | 需求 | 接口 | 方法 | 参考 |
 |---|---|---|---|
-| 上传本地文件，换取可用 URL（**收费** 0.0005 元/MB，需 apiKey；临时文件最多下载 10 次，仅下载草稿触发） | `upload_file` | POST multipart | [upload-file.md](upload-file.md) |
+| 上传本地文件，换取可用 URL（**收费** 0.005 元/MB，单次最低 0.002 元，需 apiKey；签名 URL 默认 7 天） | `upload_file` | POST multipart | [upload-file.md](upload-file.md) |
 
 ## 草稿生命周期
 
@@ -70,8 +71,11 @@
 | 查询文字动画 | `get_text_animations` | POST | [get-text-animations.md](get-text-animations.md) |
 | 查询图片动画 | `get_image_animations` | POST | [get-image-animations.md](get-image-animations.md) |
 | 查询花字 | `get_text_effects` | POST | [get-text-effects.md](get-text-effects.md) |
+| 查询滤镜列表（取 `filter_title`） | `get_filters` | POST | [get-filters.md](get-filters.md) |
+| 查询特效列表（取 `effect_title`） | `get_effects` | POST | [get-effects.md](get-effects.md) |
 | 搜索贴纸 | `search_sticker` | POST | [search-sticker.md](search-sticker.md) |
 | 获取音频时长 | `get_audio_duration` | POST | [get-audio-duration.md](get-audio-duration.md) |
+| 查询账户余额（jcaigc.cn 网关，免费） | `get_points` | GET | [get-points.md](get-points.md) |
 
 ## 格式转换
 
@@ -81,6 +85,18 @@
 | 字符串转列表 | `str_to_list` | POST | [str-to-list.md](str-to-list.md) |
 | 字符串列表转对象列表 | `str_list_to_objs` | POST | [str-list-to-objs.md](str-list-to-objs.md) |
 | 对象列表转字符串列表 | `objs_to_str_list` | POST | [objs-to-str-list.md](objs-to-str-list.md) |
+
+## 语音识别（ASR，独立服务）
+
+ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
+按音频时长 **0.00022 元/秒** 计费，识别成功后才扣费，需要 `apiKey`。与剪映小助手共用充值余额。
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 语音转文案（分句 + 逐字时间线，**毫秒**） | `asr` | POST | [asr.md](asr.md) |
+| 语音转文本（只返回带标点的文本） | `asr_text` | POST | [asr-text.md](asr-text.md) |
+| 语音转 SRT 字幕（直接返回文件本体） | `asr_srt` | POST | [asr-srt.md](asr-srt.md) |
+| 文本对齐时间线（**微秒**，可直接给 `add_captions`） | `asr_text_align` | POST | [asr-text-align.md](asr-text-align.md) |
 
 ## 指南
 
@@ -94,6 +110,7 @@
 | 需求 | 脚本 | 参考 |
 |---|---|---|
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
+| 语音识别调用（独立服务） | `scripts/call-asr.mjs` | [asr.md](asr.md) |
 | 导出任务轮询 | `scripts/poll-gen-video.mjs` | [gen-video-status.md](gen-video-status.md) |
 | 下载草稿到本机剪映草稿箱（素材本地化 + 激活发现） | `scripts/download-draft.mjs` | [download-draft.md](download-draft.md) |
 | 旧版安装入口（兼容别名） | `scripts/install-draft.mjs` | [download-draft.md](download-draft.md) |

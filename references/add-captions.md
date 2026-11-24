@@ -40,12 +40,15 @@ POST /openapi/capcut-mate/v1/add_captions
 | captions | string | ✅ | - | 字幕信息列表的 **JSON 字符串**（不是 JSON 数组本身） |
 | text_color | string | ❌ | `"#ffffff"` | 普通字幕文本颜色，十六进制，如 `#ffffff` |
 | border_color | string | ❌ | `null` | 普通字幕描边颜色，十六进制；`null` 表示无描边 |
-| alignment | integer | ❌ | `1` | 文本对齐方式：`0` 左对齐，`1` 居中，`2` 右对齐（`3`-`5` 为预留） |
+| border_alpha | number | ❌ | `1.0` | 描边不透明度 `[0.0, 1.0]`；仅在存在描边颜色时生效，关键词描边同样沿用 |
+| border_width | number | ❌ | `40.0` | 描边宽度，与剪映 UI 一致，取值 `[0.0, 100.0]`；仅在存在描边颜色时生效 |
+| alignment | integer | ❌ | `1` | 文本对齐：`0` 左对齐，`1` 居中，`2` 右对齐（横排）；`3` 垂直居中，`4` 垂直左对齐，`5` 垂直右对齐（竖排） |
 | alpha | number | ❌ | `1.0` | 文本透明度，取值范围 `[0.0, 1.0]`，`1.0` 为不透明 |
 | font | string | ❌ | `null` | 字体名称，须为下方「支持的字体」中的展示名（也支持枚举名/别名）；`null` 使用默认字体 |
 | font_size | integer | ❌ | `15` | 接口级默认字号；当 caption 项未指定 `font_size` 时生效，须 `>= 1` |
 | letter_spacing | number | ❌ | `null` | 字间距；`null` 表示使用默认值 `0` |
 | line_spacing | number | ❌ | `null` | 行间距；`null` 表示使用默认值 `0` |
+| line_max_width | number | ❌ | `0.82` | 每行最大行宽占屏幕宽度比例，取值 `[0.0, 1.0]`；开启自动换行时生效 |
 | scale_x | number | ❌ | `1.0` | 水平缩放，`1.0` 为原始大小 |
 | scale_y | number | ❌ | `1.0` | 垂直缩放，`1.0` 为原始大小 |
 | transform_x | number | ❌ | `0.0` | 水平位移（像素），正值向右，负值向左，以画布中心为原点 |
@@ -56,7 +59,12 @@ POST /openapi/capcut-mate/v1/add_captions
 | bold | boolean | ❌ | `false` | 是否开启文字加粗 |
 | has_shadow | boolean | ❌ | `false` | 是否启用**整段字幕**文本阴影 |
 | shadow_info | object | ❌ | `null` | 整段字幕阴影参数；`has_shadow=true` 且本字段为 `null` 时使用默认阴影 |
+| has_background | boolean | ❌ | `false` | 是否启用**整段字幕**文字背景（文字底下的纯色底板） |
+| background_info | object | ❌ | `null` | 文字背景参数；`has_background=true` 且本字段为 `null` 时使用默认黑色背景 |
 | text_effect | string | ❌ | `null` | 花字效果名称或 `effect_id`；有效花字会重置颜色/描边/阴影相关效果 |
+| text_template | string | ❌ | `null` | 文字模板名称或 `effect_id`（纯数字可直接透传）；与 `text_effect` 互斥，同时传入时文字模板优先 |
+| text_bubble | string | ❌ | `null` | 气泡名称、`resource_id`/`effect_id`，或 `"effect_id:resource_id"` 显式 ID 对；优先级：文字模板 > 气泡 > 花字 |
+| text_glow | string | ❌ | `null` | 发光预设名称（如 `"外发光"`）或 `resource_id`/`effect_id`，清单外传 `"effect_id:resource_id"`；与花字/模板/气泡都不互斥，可叠加 |
 
 ### captions 字段详细说明
 
@@ -81,6 +89,8 @@ POST /openapi/capcut-mate/v1/add_captions
 | in_animation_duration | integer | ❌ | `null` | 入场动画时长（微秒）；不填则用动画默认时长 |
 | out_animation_duration | integer | ❌ | `null` | 出场动画时长（微秒）；不填则用动画默认时长 |
 | loop_animation_duration | integer | ❌ | `null` | 循环动画**单次循环**时长（微秒）；不填则用动画默认时长 |
+| text_template | string | ❌ | `null` | 本条字幕的文字模板名称或 `effect_id`；未指定则使用接口级 `text_template` |
+| text_bubble | string | ❌ | `null` | 本条字幕的气泡名称、`resource_id`/`effect_id`，或 `"effect_id:resource_id"` 显式 ID 对；未指定则使用接口级 `text_bubble` |
 
 ### shadow_info / keyword_shadow_info 字段说明
 
@@ -104,22 +114,99 @@ POST /openapi/capcut-mate/v1/add_captions
 }
 ```
 
+### background_info 字段说明
+
+字段名与剪映草稿 `materials.texts[*]` 的 `background_*` 字段一一对应，取值按草稿语义给出。
+
+| 字段名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| background_color | string | ❌ | `"#000000"` | 背景颜色（十六进制）；可省略 `#`，输出统一为 `#RRGGBB` |
+| background_style | integer | ❌ | `1` | 背景样式，`1`/`2` 对应剪映的两种样式；`0` 表示无背景，**不可传入** |
+| background_alpha | number | ❌ | `1.0` | 背景不透明度，`[0, 1]` |
+| background_round_radius | number | ❌ | `0.0` | 背景圆角半径，`[0, 1]` |
+| background_height | number | ❌ | `0.14` | 背景高度（相对文字的外扩），`[0, 1]` |
+| background_width | number | ❌ | `0.14` | 背景宽度（相对文字的外扩），`[0, 1]` |
+| background_horizontal_offset | number | ❌ | `0.0` | 背景水平偏移，`[-1, 1]`，`0` 为居中，负值向左 |
+| background_vertical_offset | number | ❌ | `0.0` | 背景竖直偏移，`[-1, 1]`，`0` 为居中，负值向上 |
+
+当 `has_background=true` 且未提供 `background_info` 时，使用剪映默认背景：
+
+```json
+{
+  "background_color": "#000000",
+  "background_style": 1,
+  "background_alpha": 1.0,
+  "background_round_radius": 0.0,
+  "background_height": 0.14,
+  "background_width": 0.14,
+  "background_horizontal_offset": 0.0,
+  "background_vertical_offset": 0.0
+}
+```
+
 ### 参数详解
 
 #### 对齐方式
 
 | 值 | 说明 |
 |---|------|
-| 0 | 左对齐 |
-| 1 | 居中对齐 |
-| 2 | 右对齐 |
-| 3 | 垂直居中（预留） |
-| 4 | 垂直左对齐（预留） |
-| 5 | 垂直右对齐（预留） |
+| 0 | 左对齐（横排） |
+| 1 | 居中对齐（横排） |
+| 2 | 右对齐（横排） |
+| 3 | 垂直居中（竖排 + 居中） |
+| 4 | 垂直左对齐（竖排 + 左对齐） |
+| 5 | 垂直右对齐（竖排 + 右对齐） |
+
+`alignment` 控制文本框内的排版方向与行对齐，不改变字幕在画布上的位置；`3`/`4`/`5` 会把素材设为竖排。
+
+#### 描边
+
+`border_color` 是描边的开关：不传颜色就不会产生描边，此时 `border_alpha` / `border_width` 不生效。
+`border_alpha` 为不透明度 `[0.0, 1.0]`；`border_width` 与剪映 UI 一致，取值 `[0.0, 100.0]`，默认 `40.0`。
+关键词描边（`keyword_border_color`）同样使用接口级 `border_alpha` / `border_width`。
 
 #### 花字与阴影的关系
 
 当 `text_effect` 能解析到有效花字时，系统会将 `text_color` 重置为 `#ffffff`、`border_color` 重置为 `null`、`has_shadow` 重置为 `false`，并禁用关键词阴影（`keyword_has_shadow` 不生效）。若需要自定义颜色/阴影，请不要同时传有效花字。
+
+#### 文字模板
+
+`text_template` 用于套用剪映「文字模板」（字体、配色、描边、装饰贴纸、入场动画的成套预设）。
+取值可以是模板名称（中文）或 `effect_id`；不在已知映射表中的纯数字会被当作 `effect_id` 直接透传。
+
+* 接口级 `text_template` 作为整批字幕的默认值，单条字幕里的 `text_template` 优先。
+* 与 `text_effect` 互斥，同时传入时**文字模板优先**。
+* 文字模板**不重置** `text_color` / `border_color` / `has_shadow`（与花字不同），模板无法解析时按普通字幕处理。
+* 模板清单较大（数千个，含重名与 VIP 模板）；按名称命中靠前一条，需要精确定位时直接传 `effect_id`。
+
+#### 气泡
+
+`text_bubble` 用于给字幕套用剪映「气泡」（文字底下的装饰底板，如对话框、标签、印章）。
+气泡的 `effect_id` 与 `resource_id` **不是同一个值**，两者都需给出；清单外的气泡请用
+`"effect_id:resource_id"` 显式 ID 对传入。只传一个纯数字不会被透传，会按未找到处理并回退为普通字幕。
+
+* 支持四种写法：气泡名称、`resource_id`、`effect_id`，或 `"effect_id:resource_id"`。
+* 接口级 `text_bubble` 作为整批字幕的默认值，单条字幕里的 `text_bubble` 优先。
+* 优先级为 **文字模板 > 气泡 > 花字**；气泡与花字互斥，同时传入时气泡优先。
+* 气泡**不重置**颜色/描边/阴影（与花字相反）。
+
+#### 文字背景
+
+`has_background` / `background_info` 给字幕加纯色底板，常用来提高字幕可读性。
+
+* 必须传 `has_background=true` 才生效；只传 `background_info` 不开开关时静默忽略。
+* `has_background=true` 且不给 `background_info` 时使用默认黑色背景。
+* `background_style` 只接受 `1`/`2`；`0`（无背景）不能传入，无背景请直接不传 `has_background`。
+* 花字不会重置背景（与描边/阴影不同），两者同时使用会视觉叠加。
+
+#### 发光
+
+`text_glow` 用于给字幕加「发光」（文字边缘的辉光）。发光的 `effect_id` 与 `resource_id`
+也不是同一个值，清单外请用 `"effect_id:resource_id"` 显式 ID 对传入；只传纯数字会按未找到处理。
+
+* 发光与花字 / 文字模板 / 气泡**都不互斥**，可以叠加；它不改动文字的填充、描边与阴影。
+* `text_glow` 只作用于整批字幕，**不支持逐条指定**；一次草稿里混用两种预设需分两次调用 `add_captions`。
+* 清单外的发光会落到外发光的默认参数；需要精确复刻某个预设时请传显式 ID 对。
 
 #### 关键词阴影如何生效
 
@@ -1330,18 +1417,23 @@ VHS
       "loop_animation": "弹幕滚动",             // 【可选】循环动画名称
       "in_animation_duration": 500000,         // 【可选】入场动画时长（微秒）
       "out_animation_duration": 500000,        // 【可选】出场动画时长（微秒）
-      "loop_animation_duration": 1000000       // 【可选】循环动画单次时长（微秒）
+      "loop_animation_duration": 1000000,      // 【可选】循环动画单次时长（微秒）
+      "text_template": null,                   // 【可选】本条文字模板名称或 effect_id
+      "text_bubble": null                      // 【可选】本条气泡名称 / ID / "effect_id:resource_id"
     }
   ],
 
   "text_color": "#ffffff",                     // 【可选】普通文本颜色
   "border_color": "#333333",                   // 【可选】普通文本描边颜色
-  "alignment": 1,                              // 【可选】对齐：0左/1中/2右
+  "border_alpha": 1.0,                         // 【可选】描边不透明度 [0,1]
+  "border_width": 40.0,                        // 【可选】描边宽度 [0,100]
+  "alignment": 1,                              // 【可选】对齐：0左/1中/2右；3-5 竖排
   "alpha": 1.0,                                // 【可选】透明度 [0,1]
   "font": "得意黑",                           // 【可选】字体名称
   "font_size": 15,                             // 【可选】接口级默认字号
   "letter_spacing": 0,                         // 【可选】字间距
   "line_spacing": 0,                           // 【可选】行间距
+  "line_max_width": 0.82,                      // 【可选】每行最大行宽占屏比例 [0,1]
   "scale_x": 1.0,                              // 【可选】水平缩放
   "scale_y": 1.0,                              // 【可选】垂直缩放
   "transform_x": 0.0,                          // 【可选】水平位移（像素）
@@ -1358,8 +1450,13 @@ VHS
     "shadow_distance": 5.0,
     "shadow_angle": -45.0
   },
+  "has_background": false,                     // 【可选】整段文字背景开关
+  "background_info": null,                     // 【可选】背景参数；开启且为 null 时用默认黑底
   // 【可选】花字；与自定义颜色/阴影冲突，完整示例中置为 null 以保留阴影效果
-  "text_effect": null
+  "text_effect": null,
+  "text_template": null,                       // 【可选】整批文字模板；与花字互斥且优先
+  "text_bubble": null,                         // 【可选】整批气泡；与花字互斥、模板优先
+  "text_glow": null                            // 【可选】整批发光；可与花字/模板/气泡叠加
 }
 ```
 
@@ -1542,16 +1639,76 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
   }'
 ```
 
+#### 6. 使用文字模板
+
+```bash
+curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"普通字幕\"},{\"start\":5000000,\"end\":10000000,\"text\":\"模板字幕\",\"text_template\":\"7383613902744980770\"}]"
+  }'
+```
+
+#### 7. 使用气泡
+
+```bash
+curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"气泡字幕\"}]",
+    "text_bubble": "背景装饰54"
+  }'
+```
+
+清单外气泡用显式 ID 对：`"text_bubble": "716434:6821385652727190024"`。
+
+#### 8. 使用文字背景
+
+```bash
+curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"带背景的字幕\"}]",
+    "has_background": true,
+    "background_info": {
+      "background_color": "#000000",
+      "background_style": 1,
+      "background_alpha": 0.6,
+      "background_round_radius": 0.1,
+      "background_height": 0.14,
+      "background_width": 0.14,
+      "background_horizontal_offset": 0.0,
+      "background_vertical_offset": 0.0
+    }
+  }'
+```
+
+#### 9. 使用发光
+
+```bash
+curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "draft_url": "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/get_draft?draft_id=2025092811473036584258",
+    "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"发光字幕\"}]",
+    "text_glow": "外发光"
+  }'
+```
+
+清单外发光用显式 ID 对：`"text_glow": "9762443:7202576698775179837"`。
+
 ## 错误码说明
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |
 |--------|----------|------|----------|
-| 400 | draft_url是必填项 | 缺少草稿 URL | 提供有效的 `draft_url` |
-| 400 | captions是必填项 | 缺少字幕信息 | 提供有效的 `captions` |
-| 400 | 无效的字幕信息 | captions 校验失败 | 检查 JSON 与必填字段 |
-| 400 | 时间范围无效 | end 必须大于 start | 修正起止时间 |
-| 404 | 草稿不存在 | draft_id 无效或不在缓存中 | 检查草稿 URL |
-| 500 | 字幕添加失败 | 内部处理错误 | 联系技术支持 |
+| 1001 | 参数校验失败 | 请求体未通过字段校验 | 检查参数类型与必填字段 |
+| 2001 | 无效的草稿URL | `draft_url` 缺失、格式错误，或草稿不在缓存中 | 传入 `create_draft` 返回的 `draft_url` |
+| 2018 | 无效的字幕信息 | `captions` 不是合法 JSON、某项缺少 `start`/`end`/`text`、`end` 不大于 `start`，或文本为空 | 修正 JSON 字符串与必填字段 |
+| 2019 | 字幕添加失败 | 写入草稿过程出错 | 检查草稿状态后重试 |
+| 2042 | 草稿锁获取超时 | 同一时间只允许一个操作，草稿正被占用 | 稍后重试 |
 
 ## 注意事项
 
@@ -1560,9 +1717,14 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
 3. **颜色格式**：十六进制，如 `#ffffff`、`#ff0000`
 4. **动画名称**：请通过 `get_text_animations` 获取可用名称
 5. **花字名称**：请通过 `get_text_effects` 获取可用名称或 `effect_id`
-6. **坐标系统**：`transform_x` / `transform_y` 使用像素，内部会按画布尺寸换算
-7. **关键词阴影**：与关键词颜色/描边一样写在同一字幕的 styles 分区内，不另建字幕行；整段阴影仍由 `has_shadow` / `shadow_info` 控制
-8. **图层顺序**：先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
+6. **文字模板 / 气泡 / 发光**：`text_template` 与花字互斥且优先；优先级为文字模板 > 气泡 > 花字；
+   发光可与前三者叠加。气泡和发光的 `effect_id` 与 `resource_id` 不同，清单外请传
+   `"effect_id:resource_id"`。文字模板清单很大且含 VIP 模板，精确定位请用 `effect_id`。
+7. **文字背景**：必须 `has_background=true` 才生效；只传 `background_info` 会被忽略，
+   `background_style` 只能是 `1`/`2`。
+8. **坐标系统**：`transform_x` / `transform_y` 使用像素，内部会按画布尺寸换算
+9. **关键词阴影**：与关键词颜色/描边一样写在同一字幕的 styles 分区内，不另建字幕行；整段阴影仍由 `has_shadow` / `shadow_info` 控制
+10. **图层顺序**：先添加的在底层，后添加的在上层轨道；时间线重合时会遮挡下层内容
 
 ## 工作流程
 
@@ -1580,4 +1742,11 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_captions \
 * [获取文字动画](get-text-animations.md)
 * [获取花字效果](get-text-effects.md)
 * [保存草稿](save-draft.md)
+
+## ⚠️ 实施提示（本技能补充）
+
+- 文字模板、气泡、发光都依赖服务端的内置清单；清单里没有的名称会回退为普通字幕并记录告警，
+  不会报错。气泡/发光清单目前收录很少，除常见预设外优先传 `"effect_id:resource_id"`。
+- 同一批字幕里逐条混用不同文字模板是可以的（`captions[].text_template` 优先于接口级）；
+  但发光只支持接口级，混用两种发光需分两次调用 `add_captions`。
 * [生成视频](gen-video.md)
