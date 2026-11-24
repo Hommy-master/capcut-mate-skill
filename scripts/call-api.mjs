@@ -102,7 +102,8 @@ export const PAID_ENDPOINTS = new Set(["gen_video", "upload_file"]);
 const PAID_HINTS = {
   gen_video: "提示：gen_video 为收费接口（0.3 元/分钟），线上导出需要 apiKey。\n",
   upload_file:
-    "提示：upload_file 为收费接口（0.0005 元/MB），托管版上传需要 apiKey。\n",
+    "提示：upload_file 为收费接口（0.0005 元/MB），托管版上传需要 apiKey；" +
+    "上传的是临时文件，最多下载 10 次，超限会被系统清理，需要重新上传。\n",
 };
 
 /** 上传文件的 MIME 类型（服务端按扩展名校验，这里只为请求头更准确）。 */

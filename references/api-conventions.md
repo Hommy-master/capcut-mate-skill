@@ -88,6 +88,7 @@ node scripts/call-api.mjs --endpoint upload_file --file ./demo.mp4 --data '{"api
 ```
 
 返回的 `url` 是带签名的临时地址（默认 7 天），可直接作为 `add_videos` / `add_images` / `add_audios` 的素材地址。
+上传的是**临时文件**，同一个文件最多下载 **10 次**；超限后系统自动清理，需要重新上传。
 
 ## 草稿串联
 

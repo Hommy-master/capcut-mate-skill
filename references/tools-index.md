@@ -14,7 +14,7 @@
 
 | 需求 | 接口 | 方法 | 参考 |
 |---|---|---|---|
-| 上传本地文件，换取可用 URL（**收费** 0.0005 元/MB，需 apiKey） | `upload_file` | POST multipart | [upload-file.md](upload-file.md) |
+| 上传本地文件，换取可用 URL（**收费** 0.0005 元/MB，需 apiKey；临时文件最多下载 10 次） | `upload_file` | POST multipart | [upload-file.md](upload-file.md) |
 
 ## 草稿生命周期
 
