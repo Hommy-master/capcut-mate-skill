@@ -33,6 +33,8 @@
   轮询；按次计费，默认 `minimax-music-2.0`（0.25 元/次）。
 - **数字人复用视频网关**：`video_url + audio_url` 用 `videoretalk`（0.08 元/秒）；
   `image_url + audio_url` 用 `wan2.2-s2v`（480P 0.5 / 720P 0.9 元/秒）。
+- **文案生成走大语言模型网关**：`POST /v1/chat/completions`，本技能只接入
+  `gemini-3.5-flash-lite`（输入 2.25、输出 18.75 元/百万 token）。
 
 ## 认证与计费
 
@@ -47,6 +49,7 @@
 | 语音网关（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | ASR 默认 0.00022 元/秒；TTS 默认 2.8 元/万字符；声音复刻默认 9.9 元/个 |
 | 音乐生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `minimax-music-2.0` 0.25 元/次；`minimax-music-3.0` 1 元/次 |
 | 数字人（复用视频网关） | **是**，UUID 格式，用户自备 | 视频对口型 0.08 元/秒；图片说话 480P 0.5 / 720P 0.9 元/秒 |
+| 文案生成（大语言模型网关） | **是**，UUID 格式，用户自备 | `gemini-3.5-flash-lite`：输入 2.25、输出 18.75 元/百万 token |
 | 自部署实例 | 默认关闭校验（`ENABLE_APIKEY`） | 无托管费用 |
 
 托管版调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；

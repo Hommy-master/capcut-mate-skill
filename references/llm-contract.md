@@ -153,6 +153,26 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 响应返回 `task_id`；再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读 `video_url`。
 异步任务要及时轮询，30 分钟未取结果会 `expired` 且不退预扣费用。
 
+## 文案生成（大语言模型网关）
+
+Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按 token 计费。
+本技能只接入 `gemini-3.5-flash-lite`（输入 2.25、输出 18.75 元/百万 token）。
+
+```json
+// POST /v1/chat/completions
+{
+  "model": "gemini-3.5-flash-lite",
+  "messages": [
+    {"role": "system", "content": "你是短视频口播文案编剧。输出口语化、短句、可直接朗读的中文文案。"},
+    {"role": "user", "content": "主题：新手如何拍出稳定的手机视频。目标时长：30 秒。"}
+  ],
+  "stream": false,
+  "temperature": 0.7
+}
+```
+
+正文在 `choices[0].message.content`；计费用量在 `usage.prompt_tokens` / `usage.completion_tokens`。
+
 ## 数字人（复用视频网关）
 
 Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按生成时长计费。
