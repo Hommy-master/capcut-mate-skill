@@ -7,7 +7,7 @@
 
 完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
 `upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
-ASR 是独立服务（基地址 `https://autosubrt.jcaigc.cn`），见下方单独章节。
+ASR 与图像生成是独立服务，见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -86,6 +86,21 @@ ASR 是独立服务（基地址 `https://autosubrt.jcaigc.cn`），见下方单�
 | 字符串列表转对象列表 | `str_list_to_objs` | POST | [str-list-to-objs.md](str-list-to-objs.md) |
 | 对象列表转字符串列表 | `objs_to_str_list` | POST | [objs-to-str-list.md](objs-to-str-list.md) |
 
+## 图像生成（独立网关）
+
+图像生成走独立网关：基地址 `https://api.jcaigc.cn/v1`，鉴权用 `Authorization: Bearer <apiKey>`，
+**按张计费**，同步返回图片 URL。**默认模型 `doubao-seedream-5-0-flash`（0.12 元/张）**；
+用户未指定时用它，调用前告知计费并可换其它模型。
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 文生图 / 参考图改图 | `POST /v1/images/generations` | POST | [generate-image.md](generate-image.md) |
+| 查询当前可用模型 | `GET /v1/models` | GET | [generate-image.md](generate-image.md) |
+
+支持模型：`qwen-image-3.0-pro`、`qwen-image-3.0`、`wan2.7-image`、`wan2.7-image-pro`、
+`doubao-seedream-5-0-pro`、`doubao-seedream-5-0-flash`、`gemini-3.1-flash-image`、
+`gemini-3.1-flash-lite-image`。完整参数、单价与超时说明见 [generate-image.md](generate-image.md)。
+
 ## 语音识别（ASR，独立服务）
 
 ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
@@ -110,6 +125,7 @@ ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀
 | 需求 | 脚本 | 参考 |
 |---|---|---|
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
+| 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
 | 语音识别调用（独立服务） | `scripts/call-asr.mjs` | [asr.md](asr.md) |
 | 导出任务轮询 | `scripts/poll-gen-video.mjs` | [gen-video-status.md](gen-video-status.md) |
 | 下载草稿到本机剪映草稿箱（素材本地化 + 激活发现） | `scripts/download-draft.mjs` | [download-draft.md](download-draft.md) |

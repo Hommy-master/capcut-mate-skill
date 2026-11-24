@@ -8,7 +8,7 @@
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 仅托管版的 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。
+5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。图像生成与 ASR 是独立服务，另行计费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 8. **只能通过接口生成草稿**：除下载器安装时的素材本地化改写外，不要直接修改剪映草稿文件
@@ -17,10 +17,13 @@
 9. **ASR 是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
    按音频时长 0.00022 元/秒计费，需要 `apiKey`。`asr` / `asr_srt` 返回**毫秒**，
    `asr_text_align` 返回**微秒**（可直接给 `add_captions`）。
+10. **图像生成是独立网关**：基地址 `https://api.jcaigc.cn/v1`，`POST /v1/images/generations`，
+    鉴权用 `Authorization: Bearer <apiKey>`，按张计费（0.12–1.12 元/张），同步返回图片 URL。
 
 ## 默认工作流
 
 0. 本地素材：`POST /upload_file`（multipart，收费 0.005 元/MB）换成公网 URL（签名 URL 默认 7 天；仅下载草稿触发下载，`add_*` 只登记 URL）
+0.5 需要配图时：`POST https://api.jcaigc.cn/v1/images/generations` 生成图片（按张收费），拿 `data[].url`
 1. `POST /create_draft` → 拿到 `draft_url`
 2. 按需要多次调用 `add_videos` / `add_images` / `add_audios` / `add_captions`
 3. 可选：`add_effects` / `add_filters` / `add_keyframes` / `add_masks`
@@ -40,6 +43,25 @@ flowchart LR
   poll -->|pending or processing| poll
   poll -->|completed| videoUrl[video_url]
 ```
+
+## 可选：图像生成（独立网关）
+
+需要配图/封面时，`POST https://api.jcaigc.cn/v1/images/generations`，
+请求头 `Authorization: Bearer <apiKey>`。**默认模型 `doubao-seedream-5-0-flash`（0.12 元/张）**；
+用户未指定时用它，调用前告知单价、张数与预计费用，并说明可以换其它模型。
+
+```json
+{
+  "model": "doubao-seedream-5-0-flash",
+  "prompt": "窗台上打盹的橘猫，晨光，浅景深",
+  "size": "1024x1024",
+  "n": 1
+}
+```
+
+响应同步返回 `data[].url`，可直接作为 `add_images` 的 `image_url`。按张计费，`n` 张就是
+`单价 × n`。Gemini 两条支持参考图改图、每次只生成 1 张、结果 URL 默认 7 天有效。
+模型清单可用 `GET https://api.jcaigc.cn/v1/models` 查询。详见 [generate-image.md](generate-image.md)。
 
 ## 可选：语音识别（ASR，独立服务）
 
