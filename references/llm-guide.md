@@ -13,7 +13,7 @@
 
 ## 默认工作流
 
-0. 本地素材：`POST /upload_file`（multipart，收费）换成公网 URL（临时文件，最多下载 10 次，超限自动清理）
+0. 本地素材：`POST /upload_file`（multipart，收费）换成公网 URL（临时文件，最多下载 10 次；仅下载草稿触发下载，`add_*` 不消耗）
 1. `POST /create_draft` → 拿到 `draft_url`
 2. 按需要多次调用 `add_videos` / `add_images` / `add_audios` / `add_captions`
 3. 可选：`add_effects` / `add_filters` / `add_keyframes` / `add_masks`
