@@ -153,6 +153,24 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 响应返回 `task_id`；再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读 `video_url`。
 异步任务要及时轮询，30 分钟未取结果会 `expired` 且不退预扣费用。
 
+## 音乐生成（独立网关）
+
+Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按次计费。
+默认模型 `minimax-music-2.0`（0.25 元/次），用户未指定时用它。
+
+```json
+// POST /v1/music/generations
+{
+  "model": "minimax-music-2.0",
+  "prompt": "轻快的民谣流行，木吉他，男声温柔治愈",
+  "lyrics": "[Verse]\n晨光落在安静的窗台",
+  "output_format": "mp3"
+}
+```
+
+响应返回 `task_id`；再 `GET /v1/music/generations/{task_id}` 轮询，`succeeded` 后读 `audio_url`。
+失败全额退还，30 分钟未取结果会 `expired` 且不退预扣费用。
+
 ## 语音（独立网关）
 
 Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`。
