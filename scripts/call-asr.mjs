@@ -4,11 +4,14 @@ import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 /**
- * 简创AIGC 语音识别（ASR）通用调用器。
+ * 简创AIGC 字幕/时间线 ASR（autosubrt）调用器。
  *
  * ASR 是独立服务，基地址与剪映小助手不同：
  *   https://autosubrt.jcaigc.cn/openapi/autosubrt/v1
  * 可用环境变量 AUTOSUBRT_BASE_URL 覆盖为自部署实例。
+ *
+ * 适合 SRT 字幕、逐字时间线和文本对齐；普通「音频转文字」用
+ * scripts/transcribe-audio.mjs（网关，默认 volc.bigasr.auc_turbo）。
  *
  * 按音频时长计费（0.00022 元/秒，识别成功后扣费），需要 apiKey。
  */

@@ -153,7 +153,43 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 响应返回 `task_id`；再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读 `video_url`。
 异步任务要及时轮询，30 分钟未取结果会 `expired` 且不退预扣费用。
 
-## 语音识别（ASR，独立服务）
+## 语音（独立网关）
+
+Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`。
+
+### ASR（默认 volc.bigasr.auc_turbo，0.00022 元/秒）
+
+`POST /v1/audio/transcriptions`，`multipart/form-data`：
+
+```bash
+curl -X POST https://api.jcaigc.cn/v1/audio/transcriptions \
+  -H "Authorization: Bearer <apiKey>" \
+  -F "file=@./audio.mp3" \
+  -F "model=volc.bigasr.auc_turbo" \
+  -F "response_format=verbose_json"
+```
+
+### TTS（默认 seed-tts-2.0，2.8 元/万字符）
+
+`POST /v1/audio/speech`，JSON：
+
+```json
+{
+  "model": "seed-tts-2.0",
+  "voice": "zh_female_vv_uranus_bigtts",
+  "input": "欢迎使用语音合成。",
+  "response_format": "mp3"
+}
+```
+
+成功返回音频二进制；失败返回 JSON 错误体。
+
+### 声音复刻（默认 cosyvoice-v3.5-plus，9.9 元/个）
+
+`POST /v1/audio/voices`，`multipart/form-data`：`file` 参考音频 + `model` + 可选 `name`。
+拿到 `voice_id` 后，用同一个模型调用 `/v1/audio/speech` 合成。音色与模型必须配套。
+
+## 字幕/时间线 ASR（autosubrt，独立服务）
 
 Base URL `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，按音频时长
 0.00022 元/秒计费，需要 `apiKey`。
