@@ -8,20 +8,25 @@
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。图像生成与 ASR 是独立服务，另行计费。
+5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。图像生成、视频生成与语音网关是独立服务，另行计费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 8. **只能通过接口生成草稿**：除下载器安装时的素材本地化改写外，不要直接修改剪映草稿文件
    （草稿文件是加密的）。需要调整时重新运行 `create_draft` + `add_*`；图片、视频、音频 URL
    可复用，非必要不要重新上传。
-9. **ASR 是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
-   按音频时长 0.00022 元/秒计费，需要 `apiKey`。`asr` / `asr_srt` 返回**毫秒**，
-   `asr_text_align` 返回**微秒**（可直接给 `add_captions`）。
+9. **字幕/时间线 ASR（autosubrt）是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀
+   `/openapi/autosubrt/v1/`，按音频时长 0.00022 元/秒计费，需要 `apiKey`。`asr` / `asr_srt`
+   返回**毫秒**，`asr_text_align` 返回**微秒**（可直接给 `add_captions`）。普通音频转文字走
+   规则 12 的语音网关（默认 `volc.bigasr.auc_turbo`）。
 10. **图像生成是独立网关**：基地址 `https://api.jcaigc.cn/v1`，`POST /v1/images/generations`，
     鉴权用 `Authorization: Bearer <apiKey>`，按张计费（0.12–1.12 元/张），同步返回图片 URL。
 11. **视频生成是同一独立网关**：`POST /v1/video/generations` 提交，`GET /v1/video/generations/{task_id}`
     轮询；按秒计费，默认 `doubao-seedance-2.0` + 480P（0.45 元/秒）。异步任务要及时轮询，
     30 分钟未取结果会 `expired` 且不退预扣费用。
+12. **语音网关也是同一独立网关**：ASR `POST /v1/audio/transcriptions` 默认 `volc.bigasr.auc_turbo`
+    （0.00022 元/秒）；TTS `POST /v1/audio/speech` 默认 `seed-tts-2.0`
+    （2.8 元/万字符）；声音复刻 `POST /v1/audio/voices` 默认 `cosyvoice-v3.5-plus`（9.9 元/个）。
+    音色与模型必须配套。
 
 ## 默认工作流
 
@@ -85,7 +90,23 @@ flowchart LR
 `video_url` 或 `data[0].url`。按秒计费；`failed` 全额退还，30 分钟未取结果会 `expired`
 且不退预扣费用。完整模型/分辨率/价格见 [generate-video.md](generate-video.md)。
 
-## 可选：语音识别（ASR，独立服务）
+## 可选：语音（ASR / TTS / 声音复刻，独立网关）
+
+网关基地址 `https://api.jcaigc.cn/v1`，按默认模型调用：
+
+- **ASR 默认 `volc.bigasr.auc_turbo`**（0.00022 元/秒）：`POST /v1/audio/transcriptions`，
+  multipart 传 `file` 或 `file_url`；可选 `response_format=verbose_json` 拿分句时间线。
+- **TTS 默认 `seed-tts-2.0` + `zh_female_vv_uranus_bigtts`**（2.8 元/万字符）：
+  `POST /v1/audio/speech`，JSON 传 `model` / `input` / `voice`，返回音频二进制。
+- **声音复刻默认 `cosyvoice-v3.5-plus`**（9.9 元/个）：`POST /v1/audio/voices`，multipart 传
+  参考音频 `file`；拿到 `voice_id` 后用同一个模型合成。
+
+音色必须配套：`seed-tts-2.0` 只能配豆包 `*_uranus_bigtts`；`qwen3-tts-flash` 只能配千问内置音色；
+`cosyvoice-v3.5-*` 没有系统音色，需先复刻。用户可换其它模型，但调用前要告知模型与费用。
+详见 [voice-transcribe.md](voice-transcribe.md)、[voice-tts.md](voice-tts.md)、
+[voice-clone.md](voice-clone.md)、[voice-voices.md](voice-voices.md)。
+
+## 可选：字幕/时间线 ASR（autosubrt，独立服务）
 
 需要从音频生成字幕时：
 

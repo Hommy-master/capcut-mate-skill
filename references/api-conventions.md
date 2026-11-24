@@ -19,12 +19,16 @@
   `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/create_draft`
 - `get_draft` 使用 `GET`，`upload_file` 使用 `multipart/form-data`，其余接口均使用 `POST JSON`。
 - 调用 `create_draft` / `add_*` 等接口**不需要** API Key。托管版的 `gen_video` 与 `upload_file` 需要 UUID 格式的 `apiKey`。
-- **语音识别（ASR）是独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
-  按音频时长 0.00022 元/秒计费（识别成功后扣费），需要 `apiKey`；与剪映小助手共用充值余额。
+- **字幕/时间线 ASR 是独立服务（autosubrt）**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀
+  `/openapi/autosubrt/v1/`，按音频时长 0.00022 元/秒计费（识别成功后扣费），需要 `apiKey`；
+  与剪映小助手共用充值余额。普通「音频转文字」走下面的语音网关。
 - **图像生成是独立网关**：基地址 `https://api.jcaigc.cn/v1`，`POST /v1/images/generations`，
   鉴权用 `Authorization: Bearer <apiKey>`，按张计费（0.12–1.12 元/张），同步返回图片 URL。
 - **视频生成是同一独立网关**：`POST /v1/video/generations` 提交任务，
   `GET /v1/video/generations/{task_id}` 轮询；按秒计费，默认 `doubao-seedance-2.0` + 480P（0.45 元/秒）。
+- **语音网关也是同一独立网关**：`POST /v1/audio/transcriptions`（ASR）、`POST /v1/audio/speech`（TTS）、
+  `POST /v1/audio/voices`（声音复刻）。ASR 默认 `volc.bigasr.auc_turbo`（0.00022 元/秒），
+  TTS 默认 `seed-tts-2.0`（2.8 元/万字符），复刻默认 `cosyvoice-v3.5-plus`（9.9 元/个）。
 
 ## 认证与计费
 
@@ -36,6 +40,7 @@
 | ASR（独立服务 `autosubrt.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 0.00022 元/秒（按音频时长，识别成功后扣费） |
 | 图像生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedream-5-0-flash` 0.12 元/张；其它模型 0.2–1.12 元/张（Gemini 按 1K/2K/4K 分档） |
 | 视频生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedance-2.0` + 480P 0.45 元/秒；其它文生/图生视频模型与分辨率 0.22–5 元/秒 |
+| 语音网关（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | ASR 默认 0.00022 元/秒；TTS 默认 2.8 元/万字符；声音复刻默认 9.9 元/个 |
 | 自部署实例 | 默认关闭校验（`ENABLE_APIKEY`） | 无托管费用 |
 
 托管版调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；

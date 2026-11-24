@@ -7,7 +7,7 @@
 
 完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
 `upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
-ASR、图像生成与视频生成是独立服务，见下方单独章节。
+语音、ASR、图像生成与视频生成是独立服务，见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -116,10 +116,29 @@ ASR、图像生成与视频生成是独立服务，见下方单独章节。
 支持的模型与单价见 [generate-video.md](generate-video.md)。轮询必须用同一把 `apiKey`；
 `failed` 全额退还，30 分钟未取结果会 `expired` 且不退预扣费用。
 
-## 语音识别（ASR，独立服务）
+## 语音（独立网关）
 
-ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
-按音频时长 **0.00022 元/秒** 计费，识别成功后才扣费，需要 `apiKey`。与剪映小助手共用充值余额。
+语音识别、语音合成与声音复刻走独立网关：基地址 `https://api.jcaigc.cn/v1`，
+鉴权用 `Authorization: Bearer <apiKey>`。**默认模型**：
+ASR `volc.bigasr.auc_turbo`（0.00022 元/秒）、TTS `seed-tts-2.0`（2.8 元/万字符）、
+声音复刻 `cosyvoice-v3.5-plus`（9.9 元/个）；用户可换其它模型。
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 语音转写（默认 `volc.bigasr.auc_turbo`） | `POST /v1/audio/transcriptions` | POST multipart | [voice-transcribe.md](voice-transcribe.md) |
+| 语音合成（默认 `seed-tts-2.0`） | `POST /v1/audio/speech` | POST JSON | [voice-tts.md](voice-tts.md) |
+| 创建复刻音色（默认 `cosyvoice-v3.5-plus`） | `POST /v1/audio/voices` | POST multipart | [voice-clone.md](voice-clone.md) |
+| 列出/查询/删除复刻音色 | `GET/DELETE /v1/audio/voices[/{voice_id}]` | GET/DELETE | [voice-clone.md](voice-clone.md) |
+| 音色库（模型对应的可用音色 ID） | — | — | [voice-voices.md](voice-voices.md) |
+
+音色与模型必须配套：`seed-tts-2.0` 用豆包 `*_uranus_bigtts`；`qwen3-tts-flash` 用千问内置音色；
+`cosyvoice-v3.5-*` 没有系统音色，需先复刻。
+
+## 字幕/时间线 ASR（autosubrt 独立服务）
+
+autosubrt ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀 `/openapi/autosubrt/v1/`，
+按音频时长 **0.00022 元/秒** 计费，识别成功后才扣费，需要 `apiKey`。适合 SRT 字幕、逐字时间线
+与文本对齐；普通「音频转文字」用上面的语音网关（默认 `volc.bigasr.auc_turbo`）。
 
 | 需求 | 接口 | 方法 | 参考 |
 |---|---|---|---|
@@ -142,7 +161,10 @@ ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
 | 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
 | 视频生成调用（独立网关） | `scripts/generate-video.mjs` | [generate-video.md](generate-video.md) |
-| 语音识别调用（独立服务） | `scripts/call-asr.mjs` | [asr.md](asr.md) |
+| 语音识别调用（网关） | `scripts/transcribe-audio.mjs` | [voice-transcribe.md](voice-transcribe.md) |
+| 语音合成调用（网关） | `scripts/generate-speech.mjs` | [voice-tts.md](voice-tts.md) |
+| 声音复刻调用（网关） | `scripts/clone-voice.mjs` | [voice-clone.md](voice-clone.md) |
+| 字幕/时间线 ASR（autosubrt） | `scripts/call-asr.mjs` | [asr.md](asr.md) |
 | 导出任务轮询 | `scripts/poll-gen-video.mjs` | [gen-video-status.md](gen-video-status.md) |
 | 下载草稿到本机剪映草稿箱（素材本地化 + 激活发现） | `scripts/download-draft.mjs` | [download-draft.md](download-draft.md) |
 | 旧版安装入口（兼容别名） | `scripts/install-draft.mjs` | [download-draft.md](download-draft.md) |
