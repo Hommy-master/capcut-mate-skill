@@ -7,7 +7,8 @@
 
 完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
 `upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
-图像生成、视频生成、数字人、音乐生成、语音网关与 autosubrt ASR 是独立服务，见下方单独章节。
+文案生成（大语言模型）、图像生成、视频生成、数字人、音乐生成、语音网关与 autosubrt ASR
+是独立服务，见下方单独章节。
 
 接口英文名用于准确调用，中文说明用于快速理解。执行任务时只读取实际需要的参考文件，不要一次全读。
 
@@ -85,6 +86,22 @@
 | 字符串转列表 | `str_to_list` | POST | [str-to-list.md](str-to-list.md) |
 | 字符串列表转对象列表 | `str_list_to_objs` | POST | [str-list-to-objs.md](str-list-to-objs.md) |
 | 对象列表转字符串列表 | `objs_to_str_list` | POST | [objs-to-str-list.md](objs-to-str-list.md) |
+
+## 文案生成（大语言模型网关）
+
+文案生成走独立网关：基地址 `https://api.jcaigc.cn/v1`，鉴权用 `Authorization: Bearer <apiKey>`，
+**按 token 计费**。**本技能只接入 `gemini-3.5-flash-lite`，不接入其它大语言模型**。
+
+| 需求 | 接口 | 方法 | 参考 |
+|---|---|---|---|
+| 生成/润色视频文案、口播文案、短视频脚本 | `POST /v1/chat/completions` | POST | [generate-script.md](generate-script.md) |
+
+| 模型 | 输入 | 输出 |
+|---|---|---|
+| `gemini-3.5-flash-lite` | **2.25 元/百万 token** | **18.75 元/百万 token** |
+
+计费按 `usage.prompt_tokens` / `usage.completion_tokens` 计算；失败请求不计费。
+主要用于生成口播文案，结果可交给语音合成/数字人或作为字幕文本。
 
 ## 图像生成（独立网关）
 
@@ -191,6 +208,7 @@ autosubrt ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，�
 | 需求 | 脚本 | 参考 |
 |---|---|---|
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
+| 文案生成调用（大语言模型网关） | `scripts/generate-script.mjs` | [generate-script.md](generate-script.md) |
 | 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
 | 视频生成调用（独立网关） | `scripts/generate-video.mjs` | [generate-video.md](generate-video.md) |
 | 数字人调用（复用视频网关） | `scripts/generate-digital-human.mjs` | [digital-human.md](digital-human.md) |

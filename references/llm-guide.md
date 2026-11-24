@@ -8,7 +8,7 @@
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
 4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。图像生成、视频生成、数字人、音乐生成与语音网关是独立服务，另行计费。
+5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。文案生成、图像生成、视频生成、数字人、音乐生成与语音网关是独立服务，另行计费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 8. **只能通过接口生成草稿**：除下载器安装时的素材本地化改写外，不要直接修改剪映草稿文件
@@ -33,6 +33,9 @@
 14. **数字人复用视频网关**：`video_url + audio_url` 用 `videoretalk`（0.08 元/秒）；
     `image_url + audio_url` 用 `wan2.2-s2v`（480P 0.5 / 720P 0.9 元/秒）。模型必须与入参匹配；
     图片说话音频 ≤20 秒，视频对口型 ≤120 秒。
+15. **文案生成走大语言模型网关**：`POST /v1/chat/completions`，本技能只接入
+    `gemini-3.5-flash-lite`（输入 2.25、输出 18.75 元/百万 token）。调用前告知按 token 计费，
+    完成后按 `usage` 结算；事实性内容提醒用户核实。
 
 ## 默认工作流
 
@@ -111,6 +114,27 @@ flowchart LR
 `cosyvoice-v3.5-*` 没有系统音色，需先复刻。用户可换其它模型，但调用前要告知模型与费用。
 详见 [voice-transcribe.md](voice-transcribe.md)、[voice-tts.md](voice-tts.md)、
 [voice-clone.md](voice-clone.md)、[voice-voices.md](voice-voices.md)。
+
+## 可选：文案生成（大语言模型网关）
+
+写口播/视频文案时，`POST https://api.jcaigc.cn/v1/chat/completions`，
+请求头 `Authorization: Bearer <apiKey>`。**本技能只接入 `gemini-3.5-flash-lite`**；
+输入 2.25、输出 18.75 元/百万 token，按 `usage` 结算。
+
+```json
+{
+  "model": "gemini-3.5-flash-lite",
+  "messages": [
+    {"role": "system", "content": "你是短视频口播文案编剧。输出口语化、短句、可直接朗读的中文文案。"},
+    {"role": "user", "content": "主题：新手如何拍出稳定的手机视频。目标时长：30 秒。语气：自然亲切。"}
+  ],
+  "stream": false,
+  "temperature": 0.7
+}
+```
+
+正文在 `choices[0].message.content`；计费用量在 `usage`。文案可继续交给语音合成/数字人，
+或作为字幕文本。详见 [generate-script.md](generate-script.md)。
 
 ## 可选：数字人（复用视频网关）
 
