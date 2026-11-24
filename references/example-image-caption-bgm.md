@@ -49,7 +49,7 @@
   "text_color": "#ffffff",
   "border_color": "#000000",
   "font_size": 18,
-  "transform_y": -700,
+  "transform_y": -800,
   "bold": true
 }
 ```

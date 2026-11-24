@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，需要异步导出成片，或者需要下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现）时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate
 slug: jianchuang-jianying-assistant
-version: 2.3.4
+version: 2.3.5
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -179,7 +179,8 @@ disable: false
 - 添加贴纸时先用 `search_sticker`，并验证标题确实匹配；搜索结果非空不代表匹配成功。
 - 滤镜的 `filter_title` 必须与剪映滤镜展示名一致，未匹配到时添加会失败。
 - 字幕默认规则：除非用户另有要求，每行少于 15 个汉字且不含标点；先按标点断句并去掉标点，
-  仍超长再硬切（不要拆开数字和英文单词）。
+  仍超长再硬切（不要拆开数字和英文单词）。画布为 1080×1920 时，位置默认传
+  `transform_x: 0`、`transform_y: -800`，用户指定位置时以用户为准。
 - 美颜（`add_beauty`）只支持视频/图片片段，`skin`/`shape`/`makeup`/`body` 至少一组生效；
   字段名是英文，预设取值是中文；窄脸、下巴长短、宽肩是预留字段，只能传 0。
 - 本地文件先 `upload_file` 换成公网 URL，再进入 `add_*`；返回的是**临时文件**地址（默认 7 天有效期，

@@ -60,11 +60,14 @@
   "draft_url": "YOUR_DRAFT_URL",
   "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好剪映\"}]",
   "font_size": 15,
-  "text_color": "#ffffff"
+  "text_color": "#ffffff",
+  "transform_x": 0,
+  "transform_y": -800
 }
 ```
 
 `text` 默认每行少于 15 个汉字且不含标点：先按标点断句并去掉标点，仍超长再硬切（不拆数字和英文单词）。
+画布为 1080×1920 时，字幕位置默认 `transform_x: 0`、`transform_y: -800`。
 
 ### gen_video
 
