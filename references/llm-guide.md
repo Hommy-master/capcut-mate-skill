@@ -19,6 +19,9 @@
    `asr_text_align` 返回**微秒**（可直接给 `add_captions`）。
 10. **图像生成是独立网关**：基地址 `https://api.jcaigc.cn/v1`，`POST /v1/images/generations`，
     鉴权用 `Authorization: Bearer <apiKey>`，按张计费（0.12–1.12 元/张），同步返回图片 URL。
+11. **视频生成是同一独立网关**：`POST /v1/video/generations` 提交，`GET /v1/video/generations/{task_id}`
+    轮询；按秒计费，默认 `doubao-seedance-2.0` + 480P（0.45 元/秒）。异步任务要及时轮询，
+    30 分钟未取结果会 `expired` 且不退预扣费用。
 
 ## 默认工作流
 
@@ -62,6 +65,25 @@ flowchart LR
 响应同步返回 `data[].url`，可直接作为 `add_images` 的 `image_url`。按张计费，`n` 张就是
 `单价 × n`。Gemini 两条支持参考图改图、每次只生成 1 张、结果 URL 默认 7 天有效。
 模型清单可用 `GET https://api.jcaigc.cn/v1/models` 查询。详见 [generate-image.md](generate-image.md)。
+
+## 可选：视频生成（独立网关）
+
+需要视频片段时，`POST https://api.jcaigc.cn/v1/video/generations`，
+请求头 `Authorization: Bearer <apiKey>`。**默认模型 `doubao-seedance-2.0` + `480P`（0.45 元/秒）**；
+用户未指定时用它，调用前告知模型、分辨率、时长与预计费用，并说明可换其它模型/分辨率。
+
+```json
+{
+  "model": "doubao-seedance-2.0",
+  "prompt": "镜头缓慢推进，雨后的城市街道，霓虹倒影",
+  "resolution": "480P",
+  "duration": 5
+}
+```
+
+提交后返回 `task_id`，再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读
+`video_url` 或 `data[0].url`。按秒计费；`failed` 全额退还，30 分钟未取结果会 `expired`
+且不退预扣费用。完整模型/分辨率/价格见 [generate-video.md](generate-video.md)。
 
 ## 可选：语音识别（ASR，独立服务）
 
