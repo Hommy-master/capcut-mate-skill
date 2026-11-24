@@ -150,3 +150,6 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/create_draft \
 
 - 官方响应示例中的 `draft_url` 主机为 `cm.jcaigc.cn`，而其余接口文档统一写 `capcut-mate.jcaigc.cn`。**不要把 `draft_url` 当成可自行拼接的字符串**，一律原样透传即可，主机差异由服务端处理。
 - `draft_url` 有有效期，且草稿依赖服务端状态；跨天或长时间中断后如失效，重新 `create_draft` 并重放确定性的素材步骤。
+- 草稿只能通过本技能接口生成和修改；除下载器安装时的素材本地化改写外，禁止直接修改剪映草稿文件
+  （草稿文件是加密的）。需要调整时重新 `create_draft` 并重放 `add_*`，素材 URL 可复用，
+  非必要不要重新上传。

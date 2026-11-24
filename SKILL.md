@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，上传本地素材到对象存储，剪辑完成后默认下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现），或需要异步导出成片时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: "An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate"
 slug: jianchuang-jianying-assistant
-version: 2.4.3
+version: 2.5.0
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -58,6 +58,9 @@ disable: false
    `multipart/form-data`；其余接口全部是 `POST JSON`。
 8. **图层顺序**：图片、视频、特效、滤镜、字幕、贴纸按添加顺序叠放，先添加的在底层、后添加的在上层；
    音频是独立层，始终在最底层轨道；时间线重合时会互相遮挡。
+9. **只能通过本技能接口生成草稿**：除下载器安装时的素材本地化改写外，禁止直接修改、替换或用脚本
+   改写下载到本机的剪映草稿文件（剪映草稿文件是加密的）。需要调整时，推荐重新走一遍
+   `create_draft` → `add_*` 流程生成新草稿；图片、视频、音频 URL 可以直接复用，非必要不要重新上传。
 
 ## 怎样使用
 
@@ -86,6 +89,8 @@ disable: false
 ```
 
 编辑已有草稿时，要求用户提供本服务生成且仍可访问的 `draft_url`；改完再次调用 `save_draft`。
+若旧草稿无法继续编辑或需要较大调整，推荐重新走一遍流程生成新草稿（素材 URL 可复用），
+不要直接修改剪映草稿文件（草稿文件是加密的）。
 
 ## 接口速查
 
@@ -193,6 +198,9 @@ disable: false
   不消耗次数；重复下载同一草稿会反复消耗次数，文件被删除后需重新上传。
 - 需要控制遮挡关系时，按「先底层、后上层」的顺序调用 `add_*`：后添加的元素会盖住同一时间段的下层元素；
   音频是独立层，始终在最底层。
+- 需要调整已有草稿时，不要直接改草稿文件（剪映草稿文件是加密的；下载器的本地化改写除外）。
+  推荐重新生成：复用图片、视频、音频 URL，重跑 `create_draft` + `add_*`；非必要不要重新上传素材
+  （`upload_file` 收费）。
 - `easy_create_material` 只返回 `draft_url`；需要严格验收时改用独立的 `add_*` 接口。
 - 剪辑完成后默认下载草稿到本机剪映草稿箱，并告知用户可用剪映打开草稿查看成片；只有用户明确拒绝才跳过。
   下载前确认剪映草稿根目录：优先让下载器自动探测；探测失败时再让用户从剪映设置中确认，不要猜测或新建目录。
