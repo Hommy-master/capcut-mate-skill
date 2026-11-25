@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，用 AI 生成配图/封面、视频片段、配音、音乐或数字人视频，生成口播文案/短视频脚本，上传本地素材到对象存储，把音频转成文案/SRT 字幕或对齐字幕时间线，做声音复刻，剪辑完成后默认下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现），或需要异步导出成片时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、文生图、AI生图、图片生成、生成配图、生成封面、文生视频、图生视频、AI生成视频、生成视频片段、数字人、对口型、图片说话、口播视频、文案、口播文案、短视频脚本、AI写文案、音乐生成、AI作曲、生成BGM、生成背景音乐、语音合成、TTS、配音、声音复刻、音色、语音识别、ASR、语音转字幕、字幕对齐、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: "An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — write video scripts and voiceover copy with an LLM, generate images, short video clips, voiceovers, music and digital-human talking videos with AI models via the gateway, clone voices, upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, transcribe audio to text/SRT or align captions via the separate ASR services, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate"
 slug: jianchuang-jianying-assistant
-version: 2.13.0
+version: 2.14.0
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，支持 AI 文案生成、文生图、文生视频、数字人、音乐生成、语音合成、声音复刻、语音识别转字幕，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -121,6 +121,10 @@ disable: false
     - 图片：非 Gemini 用 `size`（`1080x1920` / `1920x1080`）；Gemini 用 `aspect_ratio`（`9:16` / `16:9`）。
     - 视频：用 `aspect_ratio`（`9:16` / `16:9`）。
     - 数字人：选择与画布同方向的竖向/横向源图片或源视频。
+18. **字幕默认样式**：普通字幕 **8 号字、字体「金陵体」、黑字 `#000000`、白边 `#ffffff`、
+    `has_shadow: true`、每行 ≤15 字**；标题/花字 **16 号字、每行 ≤8 字**。
+    用户可指定其它字号、字体、颜色、描边或阴影，优先按用户要求。
+    花字/文字模板会覆盖颜色/描边/阴影，但字号与每行字数仍按 16 / 8 执行。
 
 ## 怎样使用
 
@@ -514,9 +518,13 @@ ASR `volc.bigasr.auc_turbo`（0.00022 元/秒）；TTS `seed-tts-2.0` + `zh_fema
 - TTS 返回的是音频文件：要放进草稿，先保存到本地，再用 `upload_file` 上传成公网 URL，
   然后交给 `add_audios`。
 - 调用计费接口前可用 `get_points` 查询账户余额（单位：元，免费）。
-- 字幕默认规则：除非用户另有要求，每行少于 15 个汉字且不含标点；先按标点断句并去掉标点，
-  仍超长再硬切（不要拆开数字和英文单词）。画布为 1080×1920 时，位置默认传
-  `transform_x: 0`、`transform_y: -800`，用户指定位置时以用户为准。
+- 字幕默认样式：普通字幕 `font_size: 8`、`font: "金陵体"`、`text_color: "#000000"`、
+  `border_color: "#ffffff"`、`has_shadow: true`，每行 ≤15 字；标题/花字 `font_size: 16`，每行 ≤8 字。
+  用户可指定其它字号、字体、颜色、描边或阴影，优先按用户要求；花字/文字模板自带配色会覆盖
+  颜色/描边/阴影，但字号与每行字数仍按 16 / 8 执行。
+- 字幕拆分与位置：除非用户另有要求，字幕不含标点；先按标点断句并去掉标点，仍超长再硬切
+  （不要拆开数字和英文单词）。画布为 1080×1920 时，位置默认传 `transform_x: 0`、
+  `transform_y: -800`，用户指定位置时以用户为准。
   用 ASR 结果做字幕时，`asr` 返回的文本自带标点，按默认规则需先去掉标点。
 - 字幕还可套用文字模板（`text_template`）、气泡（`text_bubble`）、发光（`text_glow`）与文字背景
   （`has_background` + `background_info`）。文字模板与花字互斥且优先，优先级为模板 > 气泡 > 花字；
