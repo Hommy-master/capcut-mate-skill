@@ -27,6 +27,18 @@ GET  https://api.jcaigc.cn/v1/video/generations/{task_id}
 
 用户明确指定其它模型或分辨率时，按用户选择执行，不要擅自改回默认值。
 
+## 按草稿画布选择宽高比
+
+生成视频前先看草稿画布；用户明确指定比例时以用户为准：
+
+| 草稿画布 | `aspect_ratio` |
+|---|---|
+| 1080×1920 | **`9:16`** |
+| 1920×1080 | **`16:9`** |
+
+- 默认模型与其它文生/图生视频模型都可以传 `aspect_ratio`；Veo 只支持 `16:9` 与 `9:16`。
+- 不要默认生成 16:9 再裁切；需要与草稿一致时直接按上表传比例。
+
 ## 支持的模型与分辨率
 
 | 模型 | 可用分辨率 | 单价（元/秒） |
@@ -79,6 +91,7 @@ curl -X POST https://api.jcaigc.cn/v1/video/generations \
     "model": "doubao-seedance-2.0",
     "prompt": "镜头缓慢推进，雨后的城市街道，霓虹倒影",
     "resolution": "480P",
+    "aspect_ratio": "9:16",
     "duration": 5
   }'
 ```
@@ -147,13 +160,15 @@ curl https://api.jcaigc.cn/v1/video/generations/task_你的任务号 \
 
 1. **默认模型 / 分辨率**：用户未指定时用 `doubao-seedance-2.0` + `480P`（0.45 元/秒）；
    调用前告知模型、分辨率、预计时长与费用，并说明可换其它模型和分辨率。
-2. **时长**：时长直接影响费用。用户未指定时可按 5 秒估算，但要说明这是估算；
+2. **比例跟随草稿**：1080×1920 草稿传 `aspect_ratio: "9:16"`；1920×1080 传 `"16:9"`。
+   用户指定比例时以用户为准；Veo 只支持这两个比例。
+3. **时长**：时长直接影响费用。用户未指定时可按 5 秒估算，但要说明这是估算；
    Veo 只接受 4 / 6 / 8 秒。
-3. **图生视频**：提供 `image_url` 即走图生视频；`happyhorse-1.1-t2v` 不支持图生，
+4. **图生视频**：提供 `image_url` 即走图生视频；`happyhorse-1.1-t2v` 不支持图生，
    `happyhorse-1.1-i2v` 必须提供首帧图。
-4. **数字人**：带 `audio_url` / `video_url` 会进入数字人能力，本参考不展开。
-5. **及时轮询**：30 分钟不取结果会 `expired` 且不退预扣费用。
-6. **与草稿配合**：拿到 `video_url` 后可直接作为 `add_videos` 的 `video_infos[].video_url`。
+5. **数字人**：带 `audio_url` / `video_url` 会进入数字人能力，见 [digital-human.md](digital-human.md)。
+6. **及时轮询**：30 分钟不取结果会 `expired` 且不退预扣费用。
+7. **与草稿配合**：拿到 `video_url` 后可直接作为 `add_videos` 的 `video_infos[].video_url`。
 
 ## 相关接口
 
