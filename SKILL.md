@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，用 AI 生成配图/封面、视频片段、配音、音乐或数字人视频，生成口播文案/短视频脚本，上传本地素材到对象存储，把音频转成文案/SRT 字幕或对齐字幕时间线，做声音复刻，剪辑完成后默认下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现），或需要异步导出成片时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、文生图、AI生图、图片生成、生成配图、生成封面、文生视频、图生视频、AI生成视频、生成视频片段、数字人、对口型、图片说话、口播视频、文案、口播文案、短视频脚本、AI写文案、音乐生成、AI作曲、生成BGM、生成背景音乐、语音合成、TTS、配音、声音复刻、音色、语音识别、ASR、语音转字幕、字幕对齐、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: "An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — write video scripts and voiceover copy with an LLM, generate images, short video clips, voiceovers, music and digital-human talking videos with AI models via the gateway, clone voices, upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, transcribe audio to text/SRT or align captions via the separate ASR services, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate"
 slug: jianchuang-jianying-assistant
-version: 2.14.0
+version: 2.15.0
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，支持 AI 文案生成、文生图、文生视频、数字人、音乐生成、语音合成、声音复刻、语音识别转字幕，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
