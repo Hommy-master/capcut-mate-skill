@@ -71,15 +71,20 @@
 {
   "draft_url": "YOUR_DRAFT_URL",
   "captions": "[{\"start\":0,\"end\":5000000,\"text\":\"你好剪映\"}]",
-  "font_size": 15,
-  "text_color": "#ffffff",
+  "font_size": 8,
+  "font": "金陵体",
+  "text_color": "#000000",
+  "border_color": "#ffffff",
+  "has_shadow": true,
   "transform_x": 0,
   "transform_y": -800
 }
 ```
 
-`text` 默认每行少于 15 个汉字且不含标点：先按标点断句并去掉标点，仍超长再硬切（不拆数字和英文单词）。
-画布为 1080×1920 时，字幕位置默认 `transform_x: 0`、`transform_y: -800`。
+普通字幕默认 8 号字、金陵体、黑字白边、开启阴影，每行 ≤15 字；标题/花字默认 16 号字、每行 ≤8 字。
+用户可指定其它字号、字体、颜色、描边或阴影。字幕默认不含标点：先按标点断句并去掉标点，
+仍超长再硬切（不拆数字和英文单词）。画布为 1080×1920 时，字幕位置默认
+`transform_x: 0`、`transform_y: -800`。
 
 ### gen_video
 

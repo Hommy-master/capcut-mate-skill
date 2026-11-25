@@ -46,15 +46,17 @@
 {
   "draft_url": "<draft_url>",
   "captions": "[{\"start\":0,\"end\":3000000,\"text\":\"第一段字幕\"},{\"start\":3000000,\"end\":6000000,\"text\":\"第二段字幕\"},{\"start\":6000000,\"end\":9000000,\"text\":\"第三段字幕\"}]",
-  "text_color": "#ffffff",
-  "border_color": "#000000",
-  "font_size": 18,
-  "transform_y": -800,
-  "bold": true
+  "font_size": 8,
+  "font": "金陵体",
+  "text_color": "#000000",
+  "border_color": "#ffffff",
+  "has_shadow": true,
+  "transform_y": -800
 }
 ```
 
-字幕文案默认按 [add-captions.md](add-captions.md) 的规则拆分：每行少于 15 个汉字，不含标点。
+字幕默认按 [add-captions.md](add-captions.md) 的规则：普通字幕 8 号字、金陵体、黑字白边、开启阴影，
+每行 ≤15 字；标题/花字 16 号字、每行 ≤8 字；用户可指定其它字号、字体和颜色。
 
 ## 5. 添加 BGM
 
