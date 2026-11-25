@@ -3,7 +3,7 @@ name: jianchuang-jianying-assistant
 description: 当用户希望创建或编辑剪映草稿，编排图片、视频、字幕、音频、贴纸、特效、滤镜、蒙版、美颜、美型、美妆、美体或关键帧，用 AI 生成配图/封面、视频片段、配音、音乐或数字人视频，生成口播文案/短视频脚本，上传本地素材到对象存储，把音频转成文案/SRT 字幕或对齐字幕时间线，做声音复刻，剪辑完成后默认下载剪映草稿到本机剪映草稿箱（含素材本地化与激活剪映发现），或需要异步导出成片时使用。本技能完全开源免费，基于开源项目 CapCut Mate 构建，可自行部署。触发词：剪映、剪映草稿、剪映小助手、CapCut Mate、create_draft、upload_file、gen_video、文生图、AI生图、图片生成、生成配图、生成封面、文生视频、图生视频、AI生成视频、生成视频片段、数字人、对口型、图片说话、口播视频、文案、口播文案、短视频脚本、AI写文案、音乐生成、AI作曲、生成BGM、生成背景音乐、语音合成、TTS、配音、声音复刻、音色、语音识别、ASR、语音转字幕、字幕对齐、下载剪映草稿、剪映草稿下载、草稿安装、草稿箱、上传素材、美颜、自动生成剪映视频、批量做视频、开源免费。
 description_en: "An open-source, free CapCut/Jianying draft automation assistant built on the CapCut Mate open-source project — write video scripts and voiceover copy with an LLM, generate images, short video clips, voiceovers, music and digital-human talking videos with AI models via the gateway, clone voices, upload local media, arrange images, videos, captions, audio, stickers, effects, filters, masks, beauty (face/shape/makeup/body) and keyframes, transcribe audio to text/SRT or align captions via the separate ASR services, export the final video asynchronously, and download/install editable drafts into the local Jianying draft folder, including remote-media localization and draft discovery activation. Repository: https://github.com/Hommy-master/capcut-mate"
 slug: jianchuang-jianying-assistant
-version: 2.12.0
+version: 2.13.0
 displayName: 剪映小助手（简创AIGC 版）
 summary: 完全开源免费的剪映草稿自动化助手：通过简创AIGC 接口创建、编辑剪映草稿，支持 AI 文案生成、文生图、文生视频、数字人、音乐生成、语音合成、声音复刻、语音识别转字幕，异步导出成片，并把草稿完整下载到本机剪映草稿箱（素材本地化、原子发布、激活剪映发现）。开源仓库 https://github.com/Hommy-master/capcut-mate
 tags:
@@ -116,6 +116,11 @@ disable: false
     **本技能只接入 `gemini-3.5-flash-lite`，不要替换成其它大语言模型**。
     输入 2.25 元/百万 token、输出 18.75 元/百万 token；调用前告知单价，完成后按 `usage` 结算。
     主要用于生成视频文案/口播文案；事实性内容要提醒用户核实。
+17. **素材比例跟随草稿画布**：草稿为 **1080×1920** 时，图片/视频/数字人素材优先按 **9:16** 生成或选用；
+    草稿为 **1920×1080** 时优先 **16:9**。用户明确指定尺寸/比例时以用户要求为准。
+    - 图片：非 Gemini 用 `size`（`1080x1920` / `1920x1080`）；Gemini 用 `aspect_ratio`（`9:16` / `16:9`）。
+    - 视频：用 `aspect_ratio`（`9:16` / `16:9`）。
+    - 数字人：选择与画布同方向的竖向/横向源图片或源视频。
 
 ## 怎样使用
 
@@ -225,6 +230,10 @@ disable: false
 **默认模型：`doubao-seedream-5-0-flash`（0.12 元/张，最便宜）**。用户未指定时用它；
 调用前必须告诉用户默认模型、单价、`n` 张预计费用，并说明可以换其它模型。
 
+**按草稿画布选比例**：1080×1920 → 优先 9:16（非 Gemini 用 `size: "1080x1920"`；
+Gemini 用 `aspect_ratio: "9:16"`）；1920×1080 → 优先 16:9（`size: "1920x1080"` /
+`aspect_ratio: "16:9"`）。用户指定尺寸/比例时以用户为准。
+
 | 模型 | 单价 | 说明 |
 |---|---|---|
 | `doubao-seedream-5-0-flash` | **0.12 元/张** | **默认**，快、便宜，适合批量 |
@@ -250,6 +259,9 @@ disable: false
 
 **默认：`doubao-seedance-2.0` + `480P`（0.45 元/秒）**。用户未指定时用它；
 调用前必须告诉用户模型、分辨率、时长与预计费用，并说明可以换其它模型/分辨率。
+
+**按草稿画布选宽高比**：1080×1920 草稿传 `aspect_ratio: "9:16"`；1920×1080 传
+`aspect_ratio: "16:9"`。用户指定比例时以用户为准；Veo 只支持这两个比例。
 
 | 模型 | 可用分辨率 | 单价（元/秒） |
 |---|---|---|
@@ -298,6 +310,8 @@ Veo 只接受 4 / 6 / 8 秒，且只支持 `16:9` / `9:16`。完整参数与规�
 | `POST /v1/video/generations` | 提交数字人任务，返回 `task_id` | [digital-human.md](references/digital-human.md) |
 | `GET /v1/video/generations/{task_id}` | 轮询任务，`succeeded` 后读 `video_url` | [digital-human.md](references/digital-human.md) |
 
+- **素材方向跟随草稿画布**：1080×1920 草稿选竖向人像图/竖屏人物视频；1920×1080 草稿选横屏素材。
+  用户指定方向时以用户为准。
 - 图片说话音频上限 **20 秒**，更长请拆段；视频对口型音频可到 **120 秒**。
 - 视频对口型默认不延长画面；需要画面跟音频走时传 `video_extension: true`。
 - 多人画面可用 `ref_image_url` 指定参考人脸。
@@ -428,7 +442,8 @@ ASR `volc.bigasr.auc_turbo`（0.00022 元/秒）；TTS `seed-tts-2.0` + `zh_fema
 ### 创建新草稿
 
 1. 确认画布尺寸、素材 URL、顺序、总时长和文字；缺配图时先确认是否用图像生成，字幕来自音频时
-   先确认 ASR 方式并取得字幕。
+   先确认 ASR 方式并取得字幕。素材比例跟随画布：1080×1920 → 9:16；1920×1080 → 16:9，
+   用户有特殊说明除外。
 2. `create_draft` 创建草稿。
 3. 直接用 `add_*` 写入素材与效果（自己构造 JSON 字符串）。
 4. `save_draft` 收尾并取得最终 `draft_url`。
@@ -440,6 +455,9 @@ ASR `volc.bigasr.auc_turbo`（0.00022 元/秒）；TTS `seed-tts-2.0` + `zh_fema
 ### 关键选择
 
 - 用户没有说明时长、字幕映射或画面适配方式时，先补充确认；不要自行循环短音频或猜测裁切方式。
+- 生成或选用素材前先看草稿画布：**1080×1920 → 9:16；1920×1080 → 16:9**，用户有特殊说明除外。
+  图片用 `size`（非 Gemini）或 `aspect_ratio`（Gemini）；视频用 `aspect_ratio`；
+  数字人选择同方向的源图片/视频。不要默认先生成 1:1 再裁切。
 - 多素材任务先构造好完整的 JSON 字符串再调用，避免多次试错。
 - 需要配图/封面且用户没有现成素材时，用图像生成网关，**默认模型 `doubao-seedream-5-0-flash`**
   （0.12 元/张）。用户没有指定模型时不要擅自换成更贵的模型；调用前必须告知默认模型、单价、

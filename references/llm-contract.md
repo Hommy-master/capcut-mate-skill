@@ -153,6 +153,14 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 响应返回 `task_id`；再 `GET /v1/video/generations/{task_id}` 轮询，`succeeded` 后读 `video_url`。
 异步任务要及时轮询，30 分钟未取结果会 `expired` 且不退预扣费用。
 
+## 画布比例
+
+- 草稿 **1080×1920**：图片生成优先 9:16（非 Gemini `size: "1080x1920"`；
+  Gemini `aspect_ratio: "9:16"`）；视频传 `aspect_ratio: "9:16"`；数字人选竖向素材。
+- 草稿 **1920×1080**：优先 16:9（`size: "1920x1080"` / `aspect_ratio: "16:9"`）；
+  数字人选横屏素材。
+- 用户明确指定尺寸/比例时以用户为准。
+
 ## 文案生成（大语言模型网关）
 
 Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，按 token 计费。

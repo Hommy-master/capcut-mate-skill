@@ -53,11 +53,14 @@ function usage() {
     "  node scripts/generate-image.mjs --api-key <uuid> --models",
     "",
     `默认模型：${DEFAULT_MODEL}（0.12 元/张）。`,
+    "素材比例跟随草稿：1080×1920 草稿用 --size 1080x1920（Gemini 可用 --aspect-ratio 9:16）；",
+    "1920×1080 草稿用 --size 1920x1080（Gemini 用 --aspect-ratio 16:9）。",
     "",
     "示例：",
     `  node scripts/generate-image.mjs --api-key <uuid> --prompt '窗台上的橘猫，晨光，浅景深'`,
     `  node scripts/generate-image.mjs --api-key <uuid> --model qwen-image-3.0-pro --prompt '...' --n 3`,
-    `  node scripts/generate-image.mjs --api-key <uuid> --model gemini-3.1-flash-image --prompt '改成海边日落' --size 2048x2048`,
+    `  node scripts/generate-image.mjs --api-key <uuid> --prompt '...' --size 1080x1920`,
+    `  node scripts/generate-image.mjs --api-key <uuid> --model gemini-3.1-flash-image --prompt '改成海边日落' --aspect-ratio 9:16`,
     "",
     "apiKey 也可放在环境变量 JCAIGC_API_KEY。",
     `基地址：${BASE_URL}`,
@@ -74,6 +77,7 @@ function parseArgs(args) {
     "--model",
     "--prompt",
     "--size",
+    "--aspect-ratio",
     "--n",
     "--data",
     "--data-file",
@@ -253,6 +257,15 @@ async function main() {
   }
   if (options.prompt) payload.prompt = options.prompt;
   if (options.size) payload.size = options.size;
+  if (options["aspect-ratio"]) {
+    if (payload.model.startsWith("gemini-")) {
+      payload.aspect_ratio = options["aspect-ratio"];
+    } else {
+      process.stderr.write(
+        "提示：aspect_ratio 仅 Gemini 两条支持，已忽略；非 Gemini 请用 --size 指定 9:16/16:9 尺寸。\n",
+      );
+    }
+  }
   if (options.n != null) payload.n = Number(options.n);
 
   const isGemini = payload.model.startsWith("gemini-");
