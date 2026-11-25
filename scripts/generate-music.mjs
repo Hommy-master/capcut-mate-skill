@@ -23,9 +23,7 @@ const MODEL_PRICES = {
   "minimax-music-3.0": 1,
 };
 
-export const BASE_URL = (
-  process.env.JCAIGC_MUSIC_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+export const BASE_URL = DEFAULT_BASE_URL;
 
 function usage() {
   return [

@@ -7,7 +7,7 @@ GET    https://api.jcaigc.cn/v1/audio/voices/{voice_id}
 DELETE https://api.jcaigc.cn/v1/audio/voices/{voice_id}
 ```
 
-> 依据官方文档 https://docs.jcaigc.cn/voice/voice-clone 整理。
+> 依据官方文档 https://docs.jcaigc.cn/voice/voice-clone.md 整理。
 > **这是独立的语音网关**：基地址 `https://api.jcaigc.cn/v1`，鉴权用
 > `Authorization: Bearer <apiKey>`（也接受 `x-api-key`）。
 

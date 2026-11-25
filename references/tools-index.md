@@ -1,12 +1,12 @@
 # 接口索引
 
 > 完全开源免费｜开源仓库：<https://github.com/Hommy-master/capcut-mate>（Apache-2.0，Gitee 镜像 <https://gitee.com/taohongmin-gitee/capcut-mate>）
-> 可自行部署，部署后把下方基地址换成你的实例地址即可。
 
 统一基地址：`https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`
 
-完整地址 = 基地址 + `/{接口名}`。`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
-`upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`。
+完整地址 = 基地址 + `/{接口名}`。本技能使用的剪映小助手接口中，`get_draft` 使用 `GET`（`draft_id` 走 query 参数），
+`upload_file` 使用 `multipart/form-data`，其余接口全部使用 `POST JSON`；`get_points` 是 `jcaigc.cn` 余额接口的
+`GET`，不走该基地址。
 文案生成（大语言模型）、图像生成、视频生成、数字人、音乐生成、语音网关与 autosubrt ASR
 是独立服务，见下方单独章节。
 
@@ -44,7 +44,7 @@
 | 添加滤镜 | `add_filters` | POST | [add-filters.md](add-filters.md) |
 | 添加关键帧 | `add_keyframes` | POST | [add-keyframes.md](add-keyframes.md) |
 | 添加蒙版 | `add_masks` | POST | [add-masks.md](add-masks.md) |
-| 添加蒙版关键帧 | `add_mask_keyframes` | POST | [add-mask-keyframes.md](add-mask-keyframes.md) |
+| 添加蒙版关键帧（`keyframes` 为数组） | `add_mask_keyframes` | POST | [add-mask-keyframes.md](add-mask-keyframes.md) |
 | 添加美颜/美型/美妆/美体 | `add_beauty` | POST | [add-beauty.md](add-beauty.md) |
 | 添加贴纸 | `add_sticker` | POST | [add-sticker.md](add-sticker.md) |
 | 添加文本样式 | `add_text_style` | POST | [add-text-style.md](add-text-style.md) |
@@ -211,6 +211,7 @@ autosubrt ASR 是**独立服务**：基地址 `https://autosubrt.jcaigc.cn`，�
 | 需求 | 脚本 | 参考 |
 |---|---|---|
 | 通用接口调用 | `scripts/call-api.mjs` | [llm-guide.md](llm-guide.md) |
+| 查询账户余额（jcaigc.cn 网关，免费） | `scripts/get-points.mjs` | [get-points.md](get-points.md) |
 | 文案生成调用（大语言模型网关） | `scripts/generate-script.mjs` | [generate-script.md](generate-script.md) |
 | 图像生成调用（独立网关） | `scripts/generate-image.mjs` | [generate-image.md](generate-image.md) |
 | 视频生成调用（独立网关） | `scripts/generate-video.mjs` | [generate-video.md](generate-video.md) |

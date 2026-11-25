@@ -24,9 +24,7 @@ export const DEFAULT_MODEL = "cosyvoice-v3.5-plus";
 const CLONE_FEE = 9.9;
 const ALLOWED_MODELS = new Set(["cosyvoice-v3.5-plus", "cosyvoice-v3.5-flash"]);
 
-export const BASE_URL = (
-  process.env.JCAIGC_VOICE_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+export const BASE_URL = DEFAULT_BASE_URL;
 
 const MIME_TYPES = {
   mp3: "audio/mpeg",

@@ -11,18 +11,14 @@ import { pathToFileURL } from "node:url";
  *
  * 本技能完全开源免费，后端为开源项目 CapCut Mate（Apache-2.0）：
  *   https://github.com/Hommy-master/capcut-mate
- * 自部署后可用环境变量 CAPCUT_MATE_BASE_URL 覆盖基地址，例如：
- *   CAPCUT_MATE_BASE_URL=http://localhost:30000/openapi/capcut-mate/v1 node scripts/call-api.mjs --endpoint create_draft
  */
 
-/** 托管版默认基地址。 */
+/** 线上服务基地址。 */
 export const DEFAULT_BASE_URL =
   "https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1";
 
-/** 实际使用的基地址：优先取 CAPCUT_MATE_BASE_URL（自部署实例）。 */
-export const BASE_URL = (
-  process.env.CAPCUT_MATE_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+/** 实际使用的基地址。 */
+export const BASE_URL = DEFAULT_BASE_URL;
 
 /** 官方文档收录的全部接口。 */
 export const ENDPOINTS = new Set([
@@ -105,7 +101,7 @@ const PAID_HINTS = {
   gen_video:
     "提示：gen_video 为收费接口（0.3 元/分钟；VIP 0.24、SVIP 0.18 元/分钟），线上导出需要 apiKey。\n",
   upload_file:
-    "提示：upload_file 为收费接口（0.005 元/MB，单次最低 0.002 元），托管版上传需要 apiKey；" +
+    "提示：upload_file 为收费接口（0.005 元/MB，单次最低 0.002 元），线上服务上传需要 apiKey；" +
     "返回带签名的临时 URL（默认 7 天有效），过期后需要重新上传。\n",
 };
 
@@ -296,9 +292,6 @@ function usage() {
     '  node scripts/call-api.mjs --endpoint upload_file --file ./demo.mp4 --data \'{"apiKey":"<uuid>"}\'',
     "",
     `基地址：${BASE_URL}`,
-    BASE_URL === DEFAULT_BASE_URL
-      ? "  （自部署可设 CAPCUT_MATE_BASE_URL 覆盖，例如 http://localhost:30000/openapi/capcut-mate/v1）"
-      : "  （已由 CAPCUT_MATE_BASE_URL 覆盖为自部署实例）",
     "",
     "完全开源免费 · 后端 CapCut Mate：https://github.com/Hommy-master/capcut-mate",
     `可用接口（${ENDPOINTS.size} 个）：${[...ENDPOINTS].join("、")}`,

@@ -26,7 +26,7 @@ POST /openapi/capcut-mate/v1/gen_video
 | 参数名 | 类型 | 必填 | 默认值 | 说明 |
 |--------|------|------|--------|------|
 | draft_url | string | ✅ | - | 目标草稿的完整URL |
-| apiKey | string | 按服务端配置 | - | 合法 UUID；托管版 `ENABLE_APIKEY=true` 时必填 |
+| apiKey | string | 是 | - | 合法 UUID；线上服务必填 |
 
 ### 参数详解
 
@@ -82,7 +82,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/gen_video \
 | 1001 | 参数校验失败 | `apiKey` 不是合法 UUID，或参数类型不正确 | 检查参数类型与必填字段 |
 | 2001 | 无效的草稿URL | `draft_url` 缺失或不含 `draft_id` | 传入 `create_draft` 返回的 `draft_url` |
 | 2035 | 充值余额不足 | 当前余额不大于 0，或不足以覆盖预估费用 | 前往 <https://jcaigc.cn/recharge> 充值后重试 |
-| 2036 | 无效的 apiKey | `ENABLE_APIKEY=true` 且未传 `apiKey` | 登录 <https://jcaigc.cn/user-info> 获取 apiKey |
+| 2036 | 无效的 apiKey | 未传或非法 `apiKey` | 登录 <https://jcaigc.cn/user-info> 获取 apiKey |
 | 9998 | 系统内部错误 | 提交任务时发生未知错误 | 稍后重试或联系技术支持 |
 
 ## 注意事项
@@ -120,8 +120,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/gen_video \
 
 ## ⚠️ 实施提示（本技能补充）
 
-- 托管版线上导出**必须**携带 UUID 格式的 `apiKey`：`{"draft_url":"...","apiKey":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}`；
-  自部署实例可通过 `ENABLE_APIKEY=false` 关闭校验。
+- 线上导出**必须**携带 UUID 格式的 `apiKey`：`{"draft_url":"...","apiKey":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}`。
 - 本接口只表示**任务已提交**，不返回视频地址，必须接着轮询 `gen-video-status.md`。
 - 计费：0.3 元/分钟，VIP 0.24 元/分钟、SVIP 0.18 元/分钟。调用前先与用户确认，不要在没有 `apiKey` 时盲目重试。
 - 导出通常在草稿下载完成后按需提示；用户不知道从哪里获取 `apiKey` 时，提示到 <https://jcaigc.cn> 获取。

@@ -23,7 +23,7 @@ Content-Type: multipart/form-data
 
 ## 请求参数
 
-请求体是 `multipart/form-data`（本服务唯一不使用 `POST JSON` 的写接口）：
+请求体是 `multipart/form-data`（剪映小助手接口中唯一不使用 `POST JSON` 的写接口）：
 
 ```bash
 curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/upload_file \
@@ -36,7 +36,7 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/upload_file \
 | 参数名 | 类型 | 必填 | 默认值 | 说明 |
 |--------|------|------|--------|------|
 | file | file | ✅ | - | 待上传文件，单文件最大 500MB，空文件会被拒绝 |
-| apiKey | string | 按服务端配置 | - | 合法 UUID；托管版默认校验（`ENABLE_APIKEY=true`），必填 |
+| apiKey | string | 是 | - | 合法 UUID；线上服务必填 |
 
 ### 参数详解
 
@@ -50,9 +50,8 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/upload_file \
 #### apiKey
 
 * **类型**：string，UUID 格式
-* **说明**：托管版默认开启校验（`ENABLE_APIKEY=true`），缺失或非法返回 `2036`；
+* **说明**：线上服务会校验 `apiKey`，缺失或非法返回 `2036`；
   账户充值余额需**大于 0** 且覆盖本次上传费用，否则返回 `2035`。获取与充值：<https://www.jcaigc.cn>
-* 自部署实例可通过配置关闭该校验（关闭后余额判断同样跳过）。
 
 ## 响应格式
 
@@ -122,13 +121,12 @@ node scripts/call-api.mjs --endpoint add_videos --data '{
 ## 注意事项
 
 1. **收费接口**：0.005 元/MB，单次最低 0.002 元。上传前先与用户确认，不要在没有 `apiKey`
-   的情况下反复重试。自部署实例不计托管费用。
+   的情况下反复重试。
 2. **服务端中转**：文件先到本服务再转到对象存储；对象存储密钥不下发给客户端。
 3. **临时 URL**：返回的 `url` 是带签名的临时地址（默认 7 天）。只有**下载剪映草稿**时才会
    真正下载这些文件；`add_videos` / `add_images` / `add_audios` 等接口只登记 URL，不会触发下载。
    URL 过期或文件被删除后，草稿里的旧 URL 便无法读取，只能**重新上传**（按新上传再次计费）。
-4. **大小限制**：单文件最大 500MB。若服务部署在 nginx 之后，需同时放开
-   `client_max_body_size`（默认 1MB 会直接返回 HTTP 413，而不是业务错误码）。
+4. **大小限制**：单文件最大 500MB，超过会被拒绝（`2004`）。
 5. **不是草稿接口**：上传只返回 URL，不写入任何草稿；拿到 `url` 后仍需按正常流程
    `create_draft` → `add_*`。
 6. 只上传用户明确提供、且允许上传到第三方对象存储的文件；不要上传敏感或涉密内容。

@@ -8,7 +8,6 @@ import { pathToFileURL } from "node:url";
  *
  * ASR 是独立服务，基地址与剪映小助手不同：
  *   https://autosubrt.jcaigc.cn/openapi/autosubrt/v1
- * 可用环境变量 AUTOSUBRT_BASE_URL 覆盖为自部署实例。
  *
  * 适合 SRT 字幕、逐字时间线和文本对齐；普通「音频转文字」用
  * scripts/transcribe-audio.mjs（网关，默认 volc.bigasr.auc_turbo）。
@@ -16,14 +15,12 @@ import { pathToFileURL } from "node:url";
  * 按音频时长计费（0.00022 元/秒，识别成功后扣费），需要 apiKey。
  */
 
-/** 托管版默认基地址。 */
+/** 线上服务基地址。 */
 export const DEFAULT_BASE_URL =
   "https://autosubrt.jcaigc.cn/openapi/autosubrt/v1";
 
-/** 实际使用的基地址：优先取 AUTOSUBRT_BASE_URL（自部署实例）。 */
-export const BASE_URL = (
-  process.env.AUTOSUBRT_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+/** 实际使用的基地址。 */
+export const BASE_URL = DEFAULT_BASE_URL;
 
 /** 官方文档收录的 ASR 接口：接口名 → 真实路径。 */
 export const ENDPOINTS = new Map([
@@ -55,9 +52,6 @@ function usage() {
     '  node scripts/call-asr.mjs --endpoint asr_srt --data \'{...}\' --output subtitle.srt',
     "",
     `基地址：${BASE_URL}`,
-    BASE_URL === DEFAULT_BASE_URL
-      ? "  （自部署可设 AUTOSUBRT_BASE_URL 覆盖）"
-      : "  （已由 AUTOSUBRT_BASE_URL 覆盖为自部署实例）",
     "",
     `可用接口（${ENDPOINTS.size} 个）：${[...ENDPOINTS.keys()].join("、")}`,
   ].join("\n");

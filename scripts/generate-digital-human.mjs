@@ -27,9 +27,7 @@ const IMAGE_PRICES = { "480P": 0.5, "720P": 0.9 };
 const VIDEO_MAX_SECONDS = 120;
 const IMAGE_MAX_SECONDS = 20;
 
-export const BASE_URL = (
-  process.env.JCAIGC_AVATAR_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+export const BASE_URL = DEFAULT_BASE_URL;
 
 function usage() {
   return [
