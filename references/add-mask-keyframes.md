@@ -139,5 +139,5 @@ curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/add_mask_keyfr
 
 ## ⚠️ 实施提示（本技能补充）
 
-- 官方示例把 `keyframes` 写成数组，而调用指南把 `keyframes` 归为「JSON 字符串」字段。若服务端报参数类型错误，改成 JSON 字符串再试（与 `add_keyframes` 的写法保持一致）。
+- 本接口的 `keyframes` 必须是**数组**（与 `add_keyframes` 的 JSON 字符串不同），不要传 JSON 字符串。
 - 前提：片段必须先通过 `add-masks.md` 加过蒙版，本接口不会自动创建蒙版。

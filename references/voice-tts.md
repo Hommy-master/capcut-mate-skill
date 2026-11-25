@@ -4,7 +4,7 @@
 POST https://api.jcaigc.cn/v1/audio/speech
 ```
 
-> 依据官方文档 https://docs.jcaigc.cn/voice/tts 整理。
+> 依据官方文档 https://docs.jcaigc.cn/voice/tts.md 整理。
 > **这是独立的语音网关**：基地址 `https://api.jcaigc.cn/v1`，鉴权用
 > `Authorization: Bearer <apiKey>`（也接受 `x-api-key`）。
 

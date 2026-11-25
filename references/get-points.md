@@ -68,6 +68,14 @@ curl -X GET "https://jcaigc.cn/openapi/v1/user/points?apiKey=<uuid>" \
   -H "Accept-Language: zh-CN"
 ```
 
+### 本技能脚本
+
+```bash
+node scripts/get-points.mjs --api-key <uuid>
+```
+
+默认输出 `{"points":12.34,"unit":"CNY"}`；加 `--raw` 输出接口完整 JSON。
+
 ## 错误码说明
 
 | 错误码 | 错误信息 | 说明 | 解决方案 |

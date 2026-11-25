@@ -1,6 +1,6 @@
 # 精简契约
 
-> 摘自官方《精简契约》 https://docs.jcaigc.cn/capcut-mate/llm-contract.zh ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
+> 摘自官方《精简契约》 https://docs.jcaigc.cn/capcut-mate/llm-contract.zh.md ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
 
 ## 核心接口一览
 
@@ -112,7 +112,7 @@
 
 | 接口 | 必填 | 备注 |
 |------|------|------|
-| upload_file | `file`（multipart），托管版带 `apiKey` | **收费** 0.005 元/MB（单次最低 0.002 元）；返回 url 可直接给 `add_*` 用；签名 URL 默认 7 天有效 |
+| upload_file | `file`（multipart），带 `apiKey` | **收费** 0.005 元/MB（单次最低 0.002 元）；返回 url 可直接给 `add_*` 用；签名 URL 默认 7 天有效 |
 | add_effects | `draft_url`, `effect_infos` | `effect_infos` 为 JSON 字符串 |
 | add_filters | `draft_url`, `filter_infos` | `filter_infos` 为 JSON 字符串 |
 | add_keyframes | `draft_url`, `keyframes` | `keyframes` 为 JSON 字符串 |
@@ -132,7 +132,7 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
 {
   "model": "doubao-seedream-5-0-flash",
   "prompt": "窗台上打盹的橘猫，晨光，浅景深",
-  "size": "1024x1024",
+  "size": "1080x1920",
   "n": 1
 }
 ```
@@ -151,6 +151,7 @@ Base URL `https://api.jcaigc.cn/v1`，鉴权 `Authorization: Bearer <apiKey>`，
   "model": "doubao-seedance-2.0",
   "prompt": "镜头缓慢推进，雨后的城市街道，霓虹倒影",
   "resolution": "480P",
+  "aspect_ratio": "9:16",
   "duration": 5
 }
 ```

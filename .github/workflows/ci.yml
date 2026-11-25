@@ -20,7 +20,7 @@ jobs:
           name="jianchuang-jianying-assistant"
           stage="$(mktemp -d)"
           mkdir -p "$stage/$name" dist
-          cp -R SKILL.md README.md _icon.png references scripts "$stage/$name/"
+          cp -R SKILL.md README.md LICENSE _icon.png references scripts "$stage/$name/"
           (
             cd "$stage"
             zip -r -X "$GITHUB_WORKSPACE/dist/${name}.zip" "$name" -x "*.DS_Store"

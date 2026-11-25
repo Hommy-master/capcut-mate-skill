@@ -1,6 +1,6 @@
 # 音色库（语音合成 voice 可用值）
 
-> 依据官方文档 https://docs.jcaigc.cn/voice/voices 整理。
+> 依据官方文档 https://docs.jcaigc.cn/voice/voices.md 整理。
 > 合成时 `voice` 必须填**音色 ID**，不是中文展示名。音色与模型必须配套。
 
 ## 默认音色
@@ -140,4 +140,4 @@
 1. **默认音色**：`seed-tts-2.0` 默认 `zh_female_vv_uranus_bigtts`（Vivi）。
 2. **音色与模型必须配套**：千问、豆包、CosyVoice 不能交叉；跨家可能得到空音频。
 3. **豆包跨代也不行**：只用 `_uranus_bigtts` 结尾的 2.0 音色；上一代 `_moon_bigtts` 等不适用。
-4. **完整清单**：官方文档 https://docs.jcaigc.cn/voice/voices ；最新可用性以控制台为准。
+4. **完整清单**：官方文档 https://docs.jcaigc.cn/voice/voices.md ；最新可用性以控制台为准。

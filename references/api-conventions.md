@@ -2,23 +2,19 @@
 
 ## 开源与许可
 
-本技能及其后端服务 **CapCut Mate** 完全开源免费（后端 Apache-2.0，技能本体 MIT），可自行部署：
+本技能及其后端服务 **CapCut Mate** 完全开源免费（后端 Apache-2.0，技能本体 MIT）：
 
 - GitHub：<https://github.com/Hommy-master/capcut-mate>
 - Gitee 镜像：<https://gitee.com/taohongmin-gitee/capcut-mate>
 
-自部署方式（仓库内说明）：`docker-compose up -d`，或本地 `uv sync && uv run main.py`，默认监听 `30000` 端口。
-自部署后把下方基地址替换为你的实例地址即可，接口契约完全一致；
-自部署的 `gen_video` 不收取托管版费用，但导出依赖本地渲染，官方说明**仅 Windows 系统可用**。
-
 ## 基地址
 
-- 基地址：`https://capcut-mate.jcaigc.cn`（托管版；自部署请替换为你的实例地址）
+- 基地址：`https://capcut-mate.jcaigc.cn`
 - 路径前缀：`/openapi/capcut-mate/v1/`
 - 完整地址 = 基地址 + 路径前缀 + 接口名，例如
   `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/create_draft`
-- `get_draft` 使用 `GET`，`upload_file` 使用 `multipart/form-data`，其余接口均使用 `POST JSON`。
-- 调用 `create_draft` / `add_*` 等接口**不需要** API Key。托管版的 `gen_video` 与 `upload_file` 需要 UUID 格式的 `apiKey`。
+- 本技能使用的剪映小助手接口中，`get_draft` 使用 `GET`，`upload_file` 使用 `multipart/form-data`，其余接口均使用 `POST JSON`；`get_points` 是 `jcaigc.cn` 余额接口的 `GET`，不走该基地址。
+- 调用 `create_draft` / `add_*` 等接口**不需要** API Key。线上服务的 `gen_video` 与 `upload_file` 需要 UUID 格式的 `apiKey`。
 - **字幕/时间线 ASR 是独立服务（autosubrt）**：基地址 `https://autosubrt.jcaigc.cn`，路径前缀
   `/openapi/autosubrt/v1/`，按音频时长 0.00022 元/秒计费（识别成功后扣费），需要 `apiKey`；
   与剪映小助手共用充值余额。普通「音频转文字」走下面的语音网关。
@@ -41,8 +37,8 @@
 | 场景 | 是否需要 apiKey | 费用 |
 |---|---|---|
 | 创建草稿、添加素材、特效、字幕、查询等 | 否 | 免费 |
-| `upload_file` 托管版上传素材 | **是**，UUID 格式，用户自备 | 0.005 元/MB，单次最低 0.002 元（上传成功后扣费） |
-| `gen_video` 托管版导出视频 | **是**，UUID 格式，用户自备 | 0.3 元/分钟（VIP 0.24、SVIP 0.18 元/分钟） |
+| `upload_file` 上传素材 | **是**，UUID 格式，用户自备 | 0.005 元/MB，单次最低 0.002 元（上传成功后扣费） |
+| `gen_video` 导出视频 | **是**，UUID 格式，用户自备 | 0.3 元/分钟（VIP 0.24、SVIP 0.18 元/分钟） |
 | ASR（独立服务 `autosubrt.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 0.00022 元/秒（按音频时长，识别成功后扣费） |
 | 图像生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedream-5-0-flash` 0.12 元/张；其它模型 0.2–1.12 元/张（Gemini 按 1K/2K/4K 分档） |
 | 视频生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `doubao-seedance-2.0` + 480P 0.45 元/秒；其它文生/图生视频模型与分辨率 0.22–5 元/秒 |
@@ -50,9 +46,8 @@
 | 音乐生成（独立网关 `api.jcaigc.cn`） | **是**，UUID 格式，用户自备 | 默认 `minimax-music-2.0` 0.25 元/次；`minimax-music-3.0` 1 元/次 |
 | 数字人（复用视频网关） | **是**，UUID 格式，用户自备 | 视频对口型 0.08 元/秒；图片说话 480P 0.5 / 720P 0.9 元/秒 |
 | 文案生成（大语言模型网关） | **是**，UUID 格式，用户自备 | `gemini-3.5-flash-lite`：输入 2.25、输出 18.75 元/百万 token |
-| 自部署实例 | 默认关闭校验（`ENABLE_APIKEY`） | 无托管费用 |
 
-托管版调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；
+调用 `upload_file` / `gen_video` 时账户充值余额需大于 0，否则返回 `2035`；
 上传还需余额覆盖本次费用，导出会按草稿时长预估费用并提前校验余额。
 
 API Key 获取与充值：<https://www.jcaigc.cn>
@@ -118,7 +113,7 @@ API Key 获取与充值：<https://www.jcaigc.cn>
 - `captions`
 - `effect_infos`
 - `filter_infos`
-- `keyframes`（`add_keyframes`；`add_mask_keyframes` 的官方示例为数组，见该接口说明）
+- `keyframes`：`add_keyframes` 要求 JSON 字符串；`add_mask_keyframes` 要求数组，不能传字符串（见该接口说明）
 
 示例：
 
@@ -131,7 +126,7 @@ API Key 获取与充值：<https://www.jcaigc.cn>
 
 ## multipart/form-data
 
-`upload_file` 是唯一不使用 JSON 的写接口：文件放 `file` 字段、密钥放 `apiKey` 字段，见 [upload-file.md](upload-file.md)。
+在剪映小助手接口中，`upload_file` 是唯一不使用 JSON 的写接口：文件放 `file` 字段、密钥放 `apiKey` 字段，见 [upload-file.md](upload-file.md)。
 
 ```bash
 curl -X POST https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1/upload_file \

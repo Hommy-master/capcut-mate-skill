@@ -1,14 +1,14 @@
 # 模型调用指南
 
-> 摘自官方《模型调用指南》 https://docs.jcaigc.cn/capcut-mate/llm-guide.zh ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
+> 摘自官方《模型调用指南》 https://docs.jcaigc.cn/capcut-mate/llm-guide.zh.md ，基地址 `https://capcut-mate.jcaigc.cn/openapi/capcut-mate/v1`。
 
 ## 硬规则
 
 1. **Base URL** 必须是 `https://capcut-mate.jcaigc.cn`，路径前缀 `/openapi/capcut-mate/v1/`。
 2. **时间单位是微秒**：1 秒 = `1000000`。例如 5 秒片段写 `start: 0, end: 5000000`。
 3. **先 `create_draft`，后续每次写接口带上返回的 `draft_url`**。不要自己编 `draft_id`。
-4. **列表字段是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`keyframes`、`effect_infos`、`filter_infos`。
-5. 剪映小助手托管版仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。文案生成、图像生成、视频生成、数字人、音乐生成与语音网关是独立服务，另行计费。
+4. **列表字段多数是 JSON 字符串**，不是对象数组：`video_infos`、`audio_infos`、`image_infos`、`captions`、`effect_infos`、`filter_infos`；`keyframes` 例外：`add_keyframes` 传 JSON 字符串，`add_mask_keyframes` 必须传数组。
+5. 剪映小助手线上服务仅 `gen_video`（0.3 元/分钟，VIP 0.24 / SVIP 0.18）与 `upload_file`（0.005 元/MB，单次最低 0.002 元）收费，需要 `apiKey`（UUID）。其余接口免费。文案生成、图像生成、视频生成、数字人、音乐生成与语音网关是独立服务，另行计费。
 6. 导出是异步：`gen_video` 只表示任务已提交，必须轮询 `gen_video_status`。
 7. **图层顺序**：先添加的在下层、后添加的在上层；音频是独立层，始终在最底层轨道；时间线重合会遮挡。
 8. **只能通过接口生成草稿**：除下载器安装时的素材本地化改写外，不要直接修改剪映草稿文件
@@ -74,7 +74,7 @@ flowchart LR
 {
   "model": "doubao-seedream-5-0-flash",
   "prompt": "窗台上打盹的橘猫，晨光，浅景深",
-  "size": "1024x1024",
+  "size": "1080x1920",
   "n": 1
 }
 ```
@@ -94,6 +94,7 @@ flowchart LR
   "model": "doubao-seedance-2.0",
   "prompt": "镜头缓慢推进，雨后的城市街道，霓虹倒影",
   "resolution": "480P",
+  "aspect_ratio": "9:16",
   "duration": 5
 }
 ```

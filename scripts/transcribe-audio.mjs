@@ -44,9 +44,7 @@ const MODEL_INFO = {
   },
 };
 
-export const BASE_URL = (
-  process.env.JCAIGC_VOICE_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+export const BASE_URL = DEFAULT_BASE_URL;
 
 const MIME_TYPES = {
   mp3: "audio/mpeg",

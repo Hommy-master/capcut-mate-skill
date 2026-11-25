@@ -28,9 +28,7 @@ const MODEL_PRICES = {
   "cosyvoice-v3.5-flash": 0.8,
 };
 
-export const BASE_URL = (
-  process.env.JCAIGC_VOICE_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+export const BASE_URL = DEFAULT_BASE_URL;
 
 function usage() {
   return [

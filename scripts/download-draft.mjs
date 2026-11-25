@@ -15,8 +15,7 @@
  *      并用 robocopy 触发剪映的目录发现；全部文件成功后写入草稿目录提示文件；
  *   6. 轮询草稿根目录的 root_meta_info.json，确认剪映已收录该草稿。
  *
- * 域名白名单与旧版安装器一致：草稿链接只接受 jcaigc.cn 域名族；
- * 自部署实例用 CAPCUT_MATE_EXTRA_HOSTS 显式声明主机（精确匹配）。
+ * 域名白名单：草稿链接只接受 jcaigc.cn 域名族。
  *
  * 本技能完全开源免费，后端为开源项目 CapCut Mate（Apache-2.0）：
  *   https://github.com/Hommy-master/capcut-mate
@@ -85,14 +84,6 @@ import { writeDraftReadmeFile } from "./lib/draft-readme.mjs";
 
 /** 官方域名族（含 capcut-mate.jcaigc.cn、cm.jcaigc.cn 等）。 */
 const OFFICIAL_DOMAIN = "jcaigc.cn";
-
-/** 用户显式声明的自部署主机白名单（精确匹配，不做后缀匹配，避免被绕过）。 */
-const EXTRA_HOSTS = new Set(
-  String(process.env.CAPCUT_MATE_EXTRA_HOSTS || "")
-    .split(",")
-    .map((host) => host.trim().toLowerCase())
-    .filter(Boolean),
-);
 
 /** 官方文档中出现过的两种 get_draft 路径。 */
 const OFFICIAL_DRAFT_PATHS = new Set([
@@ -198,19 +189,12 @@ function isOfficialDomainHost(hostname) {
   return host === OFFICIAL_DOMAIN || host.endsWith(`.${OFFICIAL_DOMAIN}`);
 }
 
-function isDeclaredExtraHost(hostname) {
-  return EXTRA_HOSTS.has(String(hostname).toLowerCase());
-}
-
-/** 判断主机是否属于官方域名族，或用户显式声明的自部署实例。 */
+/** 判断主机是否属于官方域名族。 */
 export function isOfficialHost(hostname) {
-  return isOfficialDomainHost(hostname) || isDeclaredExtraHost(hostname);
+  return isOfficialDomainHost(hostname);
 }
 
-/**
- * 草稿文件链接校验：官方域名族必须 HTTPS；用户显式声明的自部署主机
- * 允许 HTTP（本机/内网部署常见），其余主机一律拒绝。
- */
+/** 草稿文件链接校验：只接受 jcaigc.cn 域名族，且必须使用 HTTPS。 */
 export function requireAllowedUrl(raw, expectedPaths) {
   let url;
   try {
@@ -219,18 +203,11 @@ export function requireAllowedUrl(raw, expectedPaths) {
     throw new Error(`无效链接：${raw}`);
   }
 
-  const official = isOfficialDomainHost(url.hostname);
-  const extra = isDeclaredExtraHost(url.hostname);
-  if (!official && !extra) {
-    throw new Error(
-      `仅允许下载 https://${OFFICIAL_DOMAIN} 域名族或已声明的自部署主机提供的草稿文件`,
-    );
+  if (!isOfficialDomainHost(url.hostname)) {
+    throw new Error(`仅允许下载 https://${OFFICIAL_DOMAIN} 域名族提供的草稿文件`);
   }
-  if (official && url.protocol !== "https:") {
+  if (url.protocol !== "https:") {
     throw new Error(`官方草稿链接必须使用 HTTPS：${raw}`);
-  }
-  if (extra && url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error(`草稿链接协议不受支持：${raw}`);
   }
   if (expectedPaths && !expectedPaths.has(url.pathname)) {
     throw new Error(`草稿链接路径不受支持：${url.pathname}`);
@@ -1319,7 +1296,6 @@ function usage() {
     "暂存目录原子发布（macOS/Linux）或 robocopy 触发扫描（Windows）→",
     "轮询 root_meta_info.json 确认剪映已发现草稿。",
     "",
-    "自部署实例可设 CAPCUT_MATE_EXTRA_HOSTS=主机名（逗号分隔）以允许其文件域名。",
     "完全开源免费 · 后端 CapCut Mate：https://github.com/Hommy-master/capcut-mate",
   ].join("\n");
 }

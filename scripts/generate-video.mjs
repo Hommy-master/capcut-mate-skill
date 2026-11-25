@@ -88,10 +88,8 @@ const MODEL_INFO = {
   },
 };
 
-/** 实际基地址：优先取 JCAIGC_VIDEO_BASE_URL。 */
-export const BASE_URL = (
-  process.env.JCAIGC_VIDEO_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+/** 实际基地址。 */
+export const BASE_URL = DEFAULT_BASE_URL;
 
 function usage() {
   return [
@@ -119,9 +117,6 @@ function usage() {
     "",
     "apiKey 也可放在环境变量 JCAIGC_API_KEY。",
     `基地址：${BASE_URL}`,
-    BASE_URL === DEFAULT_BASE_URL
-      ? "  （自部署/代理可设 JCAIGC_VIDEO_BASE_URL 覆盖）"
-      : "  （已由 JCAIGC_VIDEO_BASE_URL 覆盖）",
   ].join("\n");
 }
 

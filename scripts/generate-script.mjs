@@ -19,9 +19,7 @@ export const MODEL = "gemini-3.5-flash-lite";
 export const INPUT_PRICE_PER_MILLION = 2.25;
 export const OUTPUT_PRICE_PER_MILLION = 18.75;
 
-export const BASE_URL = (
-  process.env.JCAIGC_LLM_BASE_URL || DEFAULT_BASE_URL
-).replace(/\/+$/, "");
+export const BASE_URL = DEFAULT_BASE_URL;
 
 const DEFAULT_SYSTEM_PROMPT = [
   "你是短视频口播文案编剧。请写中文口播文案。",
