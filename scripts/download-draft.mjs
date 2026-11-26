@@ -55,32 +55,32 @@ import {
   fetchBytesWithRetry,
   mapLimit,
   retryDownloadTask,
-} from "./lib/download-engine.mjs";
+} from "./download-engine.mjs";
 import {
   isHttpUrl,
   localizeDraftMeta,
   materialLocalDir,
   normalizeDraftContent,
   rewriteDraftPaths,
-} from "./lib/draft-paths.mjs";
+} from "./draft-paths.mjs";
 import {
   ROOT_META_INFO_FILENAME,
   waitForDraftDiscovery,
-} from "./lib/draft-discovery.mjs";
+} from "./draft-discovery.mjs";
 import {
   backupExistingDraft,
   getStagingDraftDir,
   pathExists,
   publishStagedDraft,
   removeBackupDraft,
-} from "./lib/draft-staging.mjs";
+} from "./draft-staging.mjs";
 import {
   getMacProtectedFolderName,
   isPermissionError,
   macPermissionHint,
   probeWriteAccess,
-} from "./lib/file-permission.mjs";
-import { writeDraftReadmeFile } from "./lib/draft-readme.mjs";
+} from "./file-permission.mjs";
+import { writeDraftReadmeFile } from "./draft-readme.mjs";
 
 /** 官方域名族（含 capcut-mate.jcaigc.cn、cm.jcaigc.cn 等）。 */
 const OFFICIAL_DOMAIN = "jcaigc.cn";
